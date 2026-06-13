@@ -1,0 +1,40 @@
+{%- if section.settings.show_bar -%}
+<div class="announcement-bar" role="region" aria-label="Announcement">
+  {%- if section.settings.link != blank -%}
+    <a href="{{ section.settings.link }}">{{ section.settings.text }}</a>
+  {%- else -%}
+    <p>{{ section.settings.text }}</p>
+  {%- endif -%}
+</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_bar",
+      "label": "Show announcement bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Announcement text",
+      "default": "Free shipping on orders over ₹999 · COD available"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link (optional)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar"
+    }
+  ]
+}
+{% endschema %}

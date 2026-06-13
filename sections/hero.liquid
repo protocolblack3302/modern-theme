@@ -1,0 +1,177 @@
+<section class="hero" style="
+  {%- if section.settings.overlay_opacity > 0 -%}
+    --hero-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+  {%- endif -%}
+">
+
+  <!-- Background media -->
+  <div class="hero-media">
+    {%- if section.settings.video != blank -%}
+      <video
+        src="{{ section.settings.video }}"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="{{ section.settings.image | image_url: width: 1800 }}"
+      ></video>
+    {%- elsif section.settings.image != blank -%}
+      <img
+        src="{{ section.settings.image | image_url: width: 1800 }}"
+        srcset="
+          {{ section.settings.image | image_url: width: 750 }} 750w,
+          {{ section.settings.image | image_url: width: 1080 }} 1080w,
+          {{ section.settings.image | image_url: width: 1440 }} 1440w,
+          {{ section.settings.image | image_url: width: 1800 }} 1800w
+        "
+        sizes="100vw"
+        alt="{{ section.settings.image.alt | default: section.settings.heading | escape }}"
+        width="1800"
+        height="1013"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- else -%}
+      <img src="{{ 'lifestyle-1' | placeholder_svg_tag }}" alt="" width="1800" height="1013" loading="eager">
+    {%- endif -%}
+  </div>
+
+  <div class="hero-overlay"></div>
+
+  <!-- Content -->
+  <div class="hero-content container">
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="hero-eyebrow">{{ section.settings.eyebrow }}</span>
+    {%- endif -%}
+
+    {%- if section.settings.heading != blank -%}
+      <h1 class="hero-heading">
+        {%- assign words = section.settings.heading | split: ' ' -%}
+        {%- assign mid = words.size | divided_by: 2 -%}
+        <span class="line">{{ words | slice: 0, mid | join: ' ' }}</span>
+        <span class="line">{{ words | slice: mid, words.size | join: ' ' }}</span>
+      </h1>
+    {%- endif -%}
+
+    {%- if section.settings.subheading != blank -%}
+      <p class="hero-subheading">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+
+    <div class="hero-actions">
+      {%- if section.settings.cta_primary_label != blank -%}
+        <a href="{{ section.settings.cta_primary_url }}" class="btn btn--primary">
+          {{ section.settings.cta_primary_label }}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.cta_secondary_label != blank -%}
+        <a href="{{ section.settings.cta_secondary_url }}" class="btn btn--ghost">
+          {{ section.settings.cta_secondary_label }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="hero-scroll-hint" aria-hidden="true">
+    <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="1" y="1" width="14" height="22" rx="7"/>
+      <circle cx="8" cy="7" r="2" fill="currentColor" stroke="none">
+        <animateTransform attributeName="transform" type="translate" values="0 0;0 8;0 0" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+    <span>Scroll</span>
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "New Collection"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "BUILT FOR THE STREETS"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Premium streetwear engineered for athletes. Wear what moves you."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image"
+    },
+    {
+      "type": "video_url",
+      "id": "video",
+      "label": "Background video URL (optional)",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Dark overlay opacity (%)",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "default": 45
+    },
+    {
+      "type": "header",
+      "content": "Primary CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_primary_label",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "cta_primary_url",
+      "label": "Button URL",
+      "default": "/collections/all"
+    },
+    {
+      "type": "header",
+      "content": "Secondary CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_label",
+      "label": "Button label",
+      "default": "Explore Lookbook"
+    },
+    {
+      "type": "url",
+      "id": "cta_secondary_url",
+      "label": "Button URL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero",
+      "settings": {
+        "eyebrow": "New Collection",
+        "heading": "BUILT FOR THE STREETS",
+        "subheading": "Premium streetwear engineered for athletes. Wear what moves you.",
+        "cta_primary_label": "Shop Now",
+        "cta_primary_url": "/collections/all",
+        "cta_secondary_label": "Explore Lookbook"
+      }
+    }
+  ]
+}
+{% endschema %}

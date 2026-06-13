@@ -1,0 +1,110 @@
+{% comment %}
+  Renders a product card.
+  Accepts:
+    - product: {Object} Product Liquid object (required)
+    - lazy: {Boolean} Lazy-load images (default: true)
+{% endcomment %}
+
+{%- liquid
+  assign lazy = lazy | default: true
+  assign loading = 'lazy'
+  if lazy == false
+    assign loading = 'eager'
+  endif
+
+  assign primary_image = product.featured_media
+  assign secondary_image = product.media[1]
+
+  assign on_sale = false
+  if product.compare_at_price > product.price
+    assign on_sale = true
+  endif
+-%}
+
+<article class="product-card" data-animate="fade-up">
+  <a href="{{ product.url }}" class="product-card__media-link" aria-label="{{ product.title | escape }}">
+    <div class="product-card__media">
+
+      {%- if primary_image -%}
+        <img
+          class="product-card__img product-card__img--primary"
+          src="{{ primary_image | image_url: width: 600 }}"
+          alt="{{ primary_image.alt | escape | default: product.title }}"
+          width="600"
+          height="800"
+          loading="{{ loading }}"
+        >
+      {%- else -%}
+        <img
+          class="product-card__img product-card__img--primary"
+          src="{{ 'product-1' | placeholder_svg_tag }}"
+          alt="{{ product.title | escape }}"
+          width="600"
+          height="800"
+          loading="{{ loading }}"
+        >
+      {%- endif -%}
+
+      {%- if secondary_image -%}
+        <img
+          class="product-card__img product-card__img--secondary"
+          src="{{ secondary_image | image_url: width: 600 }}"
+          alt="{{ secondary_image.alt | escape | default: product.title }}"
+          width="600"
+          height="800"
+          loading="lazy"
+        >
+      {%- endif -%}
+
+      <!-- Badges -->
+      {%- unless product.available -%}
+        <span class="product-card__badge product-card__badge--sold-out">{{ 'cart.sold_out' | t }}</span>
+      {%- else -%}
+        {%- if on_sale -%}
+          <span class="product-card__badge product-card__badge--sale">{{ 'products.sale' | t }}</span>
+        {%- elsif product.created_at > 'now' | date: '%s' | minus: 2592000 | date: '%Y-%m-%d %H:%M' -%}
+          <span class="product-card__badge product-card__badge--new">{{ 'products.new' | t }}</span>
+        {%- endif -%}
+      {%- endunless -%}
+
+      <!-- Quick add -->
+      {%- if product.available -%}
+        <div class="product-card__quick-add">
+          {%- if product.variants.size == 1 -%}
+            <button
+              class="btn btn--primary"
+              style="padding: 0.6rem 1.1rem; font-size: 0.85rem;"
+              @click.prevent="$store.cart.addItem({{ product.first_available_variant.id }}, 1)"
+              :disabled="$store.cart.loading"
+            >
+              {{ 'cart.add_to_cart' | t }}
+            </button>
+          {%- else -%}
+            <a href="{{ product.url }}" class="btn btn--primary" style="padding: 0.6rem 1.1rem; font-size: 0.85rem;">
+              {{ 'products.view_all' | t }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </a>
+
+  <div class="product-card__info">
+    <a href="{{ product.url }}">
+      <p class="product-card__title">{{ product.title }}</p>
+    </a>
+
+    <div class="product-card__price">
+      {%- if on_sale -%}
+        <span class="product-card__price-sale">{{ product.price | money }}</span>
+        <span class="product-card__price-compare">{{ product.compare_at_price | money }}</span>
+      {%- else -%}
+        <span>
+          {%- if product.price_varies -%}{{ 'products.from' | t }} {%- endif -%}
+          {{ product.price | money }}
+        </span>
+      {%- endif -%}
+    </div>
+  </div>
+</article>

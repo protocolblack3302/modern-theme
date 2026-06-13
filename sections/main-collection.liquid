@@ -1,0 +1,44 @@
+<div class="collection-header section">
+  <div class="container">
+    <h1 class="collection-header__title" data-animate="fade-up">{{ collection.title }}</h1>
+    {%- if collection.description != blank -%}
+      <p class="collection-header__desc" style="color: var(--color-text-muted); max-width: 60ch; margin-top: 0.75rem;" data-animate="fade-up">
+        {{ collection.description }}
+      </p>
+    {%- endif -%}
+    <p class="collection-header__count">{{ collection.products_count }} products</p>
+  </div>
+</div>
+
+<div class="collection-grid">
+  <div class="container">
+    <div class="product-grid" data-animate="stagger">
+      {%- for product in collection.products -%}
+        {%- render 'product-card', product: product, lazy: forloop.first == false -%}
+      {%- else -%}
+        <p style="color: var(--color-text-muted); grid-column: 1 / -1;">No products found in this collection.</p>
+      {%- endfor -%}
+    </div>
+
+    {%- if paginate.pages > 1 -%}
+      <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
+        {%- for i in (1..paginate.pages) -%}
+          <a
+            href="{{ paginate.current_page | replace: paginate.current_page, i }}"
+            class="btn {% if paginate.current_page == i %}btn--primary{% else %}btn--ghost{% endif %}"
+            style="min-width: 44px; padding: 0.6rem 0.8rem;"
+          >{{ i }}</a>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collection",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Collection" }]
+}
+{% endschema %}

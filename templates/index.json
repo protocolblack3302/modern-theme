@@ -1,0 +1,39 @@
+{
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "settings": {
+        "show_bar": true,
+        "text": "Free shipping on orders over ₹999 · COD available"
+      }
+    },
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "eyebrow": "New Collection",
+        "heading": "BUILT FOR THE STREETS",
+        "subheading": "Premium streetwear engineered for athletes. Wear what moves you.",
+        "cta_primary_label": "Shop Now",
+        "cta_primary_url": "/collections/all",
+        "cta_secondary_label": "Explore Lookbook",
+        "overlay_opacity": 45
+      }
+    },
+    "marquee": {
+      "type": "marquee-strip",
+      "settings": {
+        "text": "ATHLENTS · PREMIUM STREETWEAR · MADE FOR ATHLETES"
+      }
+    },
+    "featured-collection": {
+      "type": "featured-collection",
+      "settings": {
+        "eyebrow": "The Collection",
+        "title": "BESTSELLERS",
+        "products_to_show": 4,
+        "show_view_all": true
+      }
+    }
+  },
+  "order": ["announcement-bar", "hero", "marquee", "featured-collection"]
+}

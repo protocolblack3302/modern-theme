@@ -1,0 +1,153 @@
+<header class="site-header" role="banner">
+  <div class="header-inner">
+
+    <!-- Desktop nav (left) -->
+    <nav class="header-nav" aria-label="Main navigation">
+      {%- for link in section.settings.menu.links -%}
+        <a href="{{ link.url }}" {% if link.active %}aria-current="page"{% endif %}>
+          {{ link.title }}
+        </a>
+      {%- endfor -%}
+    </nav>
+
+    <!-- Logo (center) -->
+    <div class="header-logo">
+      <a href="/" aria-label="{{ shop.name }}">
+        {%- if section.settings.logo != blank -%}
+          <img
+            src="{{ section.settings.logo | image_url: width: 260 }}"
+            alt="{{ shop.name }}"
+            width="{{ section.settings.logo_width }}"
+            height="auto"
+            loading="eager"
+          >
+        {%- else -%}
+          {{ shop.name }}
+        {%- endif -%}
+      </a>
+    </div>
+
+    <!-- Actions (right) -->
+    <div class="header-actions">
+
+      <!-- Search -->
+      <a href="/search" class="header-icon-btn" aria-label="Search">
+        {%- render 'icon-search' -%}
+      </a>
+
+      <!-- Account -->
+      {%- if shop.customer_accounts_enabled -%}
+        <a
+          href="{%- if customer -%}/account{%- else -%}/account/login{%- endif -%}"
+          class="header-icon-btn"
+          aria-label="{{ 'account.my_account' | t }}"
+        >
+          {%- render 'icon-account' -%}
+        </a>
+      {%- endif -%}
+
+      <!-- Cart -->
+      <button
+        class="header-icon-btn"
+        @click="$store.cart.open = true"
+        aria-label="{{ 'cart.title' | t }}"
+      >
+        {%- render 'icon-cart' -%}
+        <span
+          class="cart-count"
+          :data-count="$store.cart.totalQuantity"
+          x-text="$store.cart.totalQuantity"
+        ></span>
+      </button>
+
+      <!-- Mobile hamburger -->
+      <button
+        class="header-icon-btn header-hamburger"
+        @click="$store.menu.toggle()"
+        aria-label="Open menu"
+        aria-expanded="false"
+        :aria-expanded="$store.menu.open.toString()"
+      >
+        {%- render 'icon-hamburger' -%}
+      </button>
+
+    </div>
+  </div>
+</header>
+
+<!-- Mobile fullscreen menu -->
+<div
+  class="mobile-menu"
+  x-show="$store.menu.open"
+  x-transition:enter="transition"
+  x-transition:enter-start="opacity-0"
+  x-transition:enter-end="opacity-100"
+  x-transition:leave="transition"
+  x-transition:leave-start="opacity-100"
+  x-transition:leave-end="opacity-0"
+  @keydown.escape.window="$store.menu.close()"
+  role="dialog"
+  aria-label="Mobile navigation"
+  style="display:none"
+>
+  <div class="mobile-menu-header">
+    <div class="header-logo">
+      <a href="/" @click="$store.menu.close()">
+        {%- if section.settings.logo != blank -%}
+          <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="{{ section.settings.logo_width | divided_by: 2 }}" loading="lazy">
+        {%- else -%}
+          {{ shop.name }}
+        {%- endif -%}
+      </a>
+    </div>
+    <button class="header-icon-btn" @click="$store.menu.close()" aria-label="Close menu">
+      {%- render 'icon-close' -%}
+    </button>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    {%- for link in section.settings.menu.links -%}
+      <a href="{{ link.url }}" @click="$store.menu.close()">{{ link.title }}</a>
+    {%- endfor -%}
+  </nav>
+
+  <div class="mobile-menu-footer">
+    {%- if settings.social_instagram != blank -%}
+      <a href="{{ settings.social_instagram }}" aria-label="Instagram" target="_blank" rel="noopener">Instagram</a>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Header",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "label": "Logo width (px)",
+      "min": 60,
+      "max": 300,
+      "step": 10,
+      "default": 140
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Navigation menu",
+      "default": "main-menu"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Header"
+    }
+  ]
+}
+{% endschema %}

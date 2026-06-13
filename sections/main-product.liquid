@@ -1,0 +1,149 @@
+{%- liquid
+  assign product = product
+  assign current_variant = product.selected_or_first_available_variant
+-%}
+
+<section class="product-page" x-data="productPage({{ product | json | escape }})" x-cloak>
+  <div class="container">
+    <div class="product-layout">
+
+      <!-- Gallery -->
+      <div class="product-gallery">
+        <div class="product-gallery__main">
+          <img
+            :src="product.images[activeImageIndex]?.src || '{{ current_variant.featured_image | image_url: width: 900 }}'"
+            :alt="product.images[activeImageIndex]?.alt || '{{ product.title | escape }}'"
+            src="{{ current_variant.featured_image | default: product.featured_image | image_url: width: 900 }}"
+            alt="{{ product.title | escape }}"
+            width="900"
+            height="1200"
+            loading="eager"
+            fetchpriority="high"
+          >
+        </div>
+
+        {%- if product.images.size > 1 -%}
+          <div class="product-gallery__thumbs">
+            {%- for image in product.images -%}
+              <button
+                class="product-gallery__thumb {% if forloop.first %}active{% endif %}"
+                data-index="{{ forloop.index0 }}"
+                data-src="{{ image | image_url: width: 900 }}"
+                data-srcset="{{ image | image_url: width: 600 }} 600w, {{ image | image_url: width: 900 }} 900w"
+                @click="setActiveImage({{ forloop.index0 }})"
+                :class="{ active: activeImageIndex === {{ forloop.index0 }} }"
+                aria-label="View image {{ forloop.index }}"
+              >
+                <img
+                  src="{{ image | image_url: width: 144 }}"
+                  alt="{{ image.alt | escape | default: product.title }}"
+                  width="72"
+                  height="96"
+                  loading="lazy"
+                >
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- Details -->
+      <div class="product-details" data-animate="fade-up">
+        <p class="product-details__brand">{{ product.vendor }}</p>
+        <h1 class="product-details__title">{{ product.title }}</h1>
+
+        <!-- Price -->
+        <div class="product-details__price">
+          <template x-if="currentVariant">
+            <span>
+              <span :class="currentVariant.compare_at_price > currentVariant.price ? 'product-details__price--sale' : ''"
+                x-text="new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(currentVariant.price / 100)">
+              </span>
+              <span
+                class="product-details__price--compare"
+                x-show="currentVariant.compare_at_price > currentVariant.price"
+                x-text="new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(currentVariant.compare_at_price / 100)"
+              ></span>
+            </span>
+          </template>
+        </div>
+
+        <!-- Options -->
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            <div class="option-group">
+              <p class="option-group__label">
+                {{ option.name }}: <span x-text="selectedOptions['{{ option.name }}']"></span>
+              </p>
+              <div class="option-pills">
+                {%- for value in option.values -%}
+                  <button
+                    class="option-pill"
+                    :class="{
+                      active: selectedOptions['{{ option.name }}'] === '{{ value | escape }}',
+                      unavailable: !isOptionAvailable('{{ option.name }}', '{{ value | escape }}')
+                    }"
+                    @click="selectOption('{{ option.name }}', '{{ value | escape }}')"
+                  >
+                    {{ value }}
+                  </button>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+
+        <!-- Quantity -->
+        <div class="option-group">
+          <p class="option-group__label">Quantity</p>
+          <div class="qty-control" style="display: inline-flex; padding: 0.5rem 0.75rem;">
+            <button class="qty-btn" @click="quantity = Math.max(1, quantity - 1)">−</button>
+            <span class="qty-value" x-text="quantity"></span>
+            <button class="qty-btn" @click="quantity++">+</button>
+          </div>
+        </div>
+
+        <!-- ATC -->
+        <div class="product-details__atc">
+          <template x-if="currentVariant && currentVariant.available">
+            <button
+              class="btn btn--primary btn--full"
+              @click="addToCart()"
+              :disabled="addingToCart"
+            >
+              <span x-show="!addingToCart && !addedToCart">{{ 'cart.add_to_cart' | t }}</span>
+              <span x-show="addingToCart">{{ 'general.loading' | t }}</span>
+              <span x-show="addedToCart">Added!</span>
+            </button>
+          </template>
+          <template x-if="!currentVariant || !currentVariant.available">
+            <button class="btn btn--ghost btn--full btn--sold-out" disabled>
+              {{ 'cart.sold_out' | t }}
+            </button>
+          </template>
+        </div>
+
+        <!-- Description -->
+        {%- if product.description != blank -%}
+          <div class="product-details__desc">
+            {{ product.description }}
+          </div>
+        {%- endif -%}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main product",
+  "tag": "section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Main product"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,34 @@
+<div class="marquee-strip" aria-hidden="true">
+  <div class="marquee-track">
+    {%- for i in (1..6) -%}
+      <div class="marquee-item">
+        <span>{{ section.settings.text }}</span>
+        <span class="marquee-dot"></span>
+        <span>{{ section.settings.text }}</span>
+        <span class="marquee-dot"></span>
+        <span>{{ section.settings.text }}</span>
+        <span class="marquee-dot"></span>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Marquee strip",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Marquee text",
+      "default": "ATHLENTS · PREMIUM STREETWEAR · MADE FOR ATHLETES"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Marquee strip"
+    }
+  ]
+}
+{% endschema %}

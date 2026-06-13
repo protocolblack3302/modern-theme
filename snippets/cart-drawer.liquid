@@ -1,0 +1,116 @@
+<div
+  class="cart-drawer"
+  x-show="$store.cart.open"
+  x-transition:enter="transition"
+  x-transition:enter-start="opacity-0 translate-x-full"
+  x-transition:enter-end="opacity-100 translate-x-0"
+  x-transition:leave="transition"
+  x-transition:leave-start="opacity-100 translate-x-0"
+  x-transition:leave-end="opacity-0 translate-x-full"
+  @keydown.escape.window="$store.cart.open = false"
+  role="dialog"
+  aria-label="{{ 'cart.title' | t }}"
+  aria-modal="true"
+  style="display:none"
+>
+
+  <!-- Header -->
+  <div class="cart-drawer-header">
+    <h2 class="cart-drawer-title">{{ 'cart.title' | t }}</h2>
+    <button
+      class="cart-drawer-close header-icon-btn"
+      @click="$store.cart.open = false"
+      aria-label="{{ 'general.close' | t }}"
+    >
+      {%- render 'icon-close' -%}
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="cart-drawer-body">
+
+    <!-- Empty state -->
+    <div class="cart-empty" x-show="$store.cart.items.length === 0">
+      <div class="cart-empty-icon">
+        {%- render 'icon-cart' -%}
+      </div>
+      <p>{{ 'cart.empty' | t }}</p>
+      <button class="btn btn--ghost" @click="$store.cart.open = false">
+        {{ 'cart.continue_shopping' | t }}
+      </button>
+    </div>
+
+    <!-- Items list -->
+    <div x-show="$store.cart.items.length > 0">
+      <template x-for="item in $store.cart.items" :key="item.key">
+        <div class="cart-item">
+
+          <!-- Product image -->
+          <a :href="item.url">
+            <img
+              class="cart-item__img"
+              :src="item.image"
+              :alt="item.title"
+              width="80"
+              height="107"
+              loading="lazy"
+            >
+          </a>
+
+          <!-- Details -->
+          <div class="cart-item__details">
+            <a :href="item.url" class="cart-item__title" x-text="item.product_title"></a>
+
+            <p class="cart-item__variant" x-show="item.variant_title && item.variant_title !== 'Default Title'" x-text="item.variant_title"></p>
+
+            <p class="cart-item__price" x-text="$store.cart.formattedPrice(item.price)"></p>
+
+            <div class="cart-item__footer">
+              <!-- Qty control -->
+              <div class="qty-control">
+                <button
+                  class="qty-btn"
+                  @click="$store.cart.updateItem(item.key, item.quantity - 1)"
+                  :disabled="item.quantity <= 1 || $store.cart.loading"
+                  aria-label="Decrease quantity"
+                >−</button>
+                <span class="qty-value" x-text="item.quantity"></span>
+                <button
+                  class="qty-btn"
+                  @click="$store.cart.updateItem(item.key, item.quantity + 1)"
+                  :disabled="$store.cart.loading"
+                  aria-label="Increase quantity"
+                >+</button>
+              </div>
+
+              <button
+                class="cart-item__remove"
+                @click="$store.cart.removeItem(item.key)"
+                :disabled="$store.cart.loading"
+              >
+                {{ 'cart.remove' | t }}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </template>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="cart-drawer-footer" x-show="$store.cart.items.length > 0">
+    <div class="cart-subtotal">
+      <span class="cart-subtotal__label">{{ 'cart.subtotal' | t }}</span>
+      <span class="cart-subtotal__amount" x-text="$store.cart.formattedTotal"></span>
+    </div>
+
+    <a href="/checkout" class="btn btn--primary btn--full">
+      {{ 'cart.checkout' | t }}
+    </a>
+
+    <p class="cart-note">Taxes and shipping calculated at checkout</p>
+  </div>
+
+</div>

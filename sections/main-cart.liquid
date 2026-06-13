@@ -1,0 +1,72 @@
+<div class="section">
+  <div class="container" style="padding-top: calc(72px + 3rem);">
+    <h1 class="section-title" style="margin-bottom: 2rem;" data-animate="fade-up">{{ 'cart.title' | t }}</h1>
+
+    {%- if cart.item_count > 0 -%}
+      <form action="/cart" method="post" novalidate>
+        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 3rem; align-items: start;">
+
+          <!-- Items -->
+          <div>
+            {%- for item in cart.items -%}
+              <div class="cart-item">
+                <a href="{{ item.url }}">
+                  <img
+                    class="cart-item__img"
+                    src="{{ item.image | image_url: width: 160 }}"
+                    alt="{{ item.title | escape }}"
+                    width="80"
+                    height="107"
+                    loading="lazy"
+                  >
+                </a>
+                <div class="cart-item__details">
+                  <a href="{{ item.url }}" class="cart-item__title">{{ item.product.title }}</a>
+                  {%- unless item.variant.title == 'Default Title' -%}
+                    <p class="cart-item__variant">{{ item.variant.title }}</p>
+                  {%- endunless -%}
+                  <p class="cart-item__price">{{ item.price | money }}</p>
+                  <div class="cart-item__footer">
+                    <div class="qty-control">
+                      <a href="/cart/change?id={{ item.id }}&quantity={{ item.quantity | minus: 1 }}" class="qty-btn">−</a>
+                      <span class="qty-value">{{ item.quantity }}</span>
+                      <a href="/cart/change?id={{ item.id }}&quantity={{ item.quantity | plus: 1 }}" class="qty-btn">+</a>
+                    </div>
+                    <a href="/cart/change?id={{ item.id }}&quantity=0" class="cart-item__remove">{{ 'cart.remove' | t }}</a>
+                  </div>
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+
+          <!-- Summary -->
+          <div style="position: sticky; top: calc(72px + 2rem); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.75rem; display: flex; flex-direction: column; gap: 1.25rem;">
+            <h2 style="font-size: 1.4rem;">Order Summary</h2>
+            <div class="cart-subtotal">
+              <span class="cart-subtotal__label">{{ 'cart.subtotal' | t }}</span>
+              <span class="cart-subtotal__amount">{{ cart.total_price | money }}</span>
+            </div>
+            <p class="cart-note">Taxes and shipping calculated at checkout</p>
+            <button type="submit" name="checkout" class="btn btn--primary btn--full">{{ 'cart.checkout' | t }}</button>
+            <a href="/collections/all" class="btn btn--ghost btn--full">{{ 'cart.continue_shopping' | t }}</a>
+          </div>
+
+        </div>
+      </form>
+    {%- else -%}
+      <div style="text-align: center; padding: 5rem 0; color: var(--color-text-muted);">
+        <p style="margin-bottom: 2rem; font-size: 1.1rem;">{{ 'cart.empty' | t }}</p>
+        <a href="/collections/all" class="btn btn--primary">{{ 'cart.continue_shopping' | t }}</a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Cart",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Cart" }]
+}
+{% endschema %}

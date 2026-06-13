@@ -1,0 +1,42 @@
+{
+  "general": {
+    "search": "Search",
+    "close": "Close",
+    "loading": "Loading..."
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is empty.",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout",
+    "remove": "Remove",
+    "quantity": "Qty",
+    "continue_shopping": "Continue Shopping",
+    "add_to_cart": "Add to Cart",
+    "sold_out": "Sold Out",
+    "view_cart": "View Cart"
+  },
+  "products": {
+    "view_all": "View All",
+    "sale": "Sale",
+    "new": "New",
+    "from": "From",
+    "size_guide": "Size Guide"
+  },
+  "account": {
+    "login": "Log in",
+    "logout": "Log out",
+    "register": "Register",
+    "my_account": "My Account"
+  },
+  "newsletter": {
+    "placeholder": "Your email address",
+    "submit": "Subscribe",
+    "success": "Thanks for subscribing!"
+  },
+  "404": {
+    "title": "Page not found",
+    "message": "The page you were looking for doesn't exist.",
+    "cta": "Back to Home"
+  }
+}

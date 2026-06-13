@@ -1,0 +1,104 @@
+{%- liquid
+  assign collection = section.settings.collection
+  assign product_limit = section.settings.products_to_show
+-%}
+
+<section class="section featured-collection">
+  <div class="container">
+
+    <div class="section-header" data-animate="fade-up">
+      <div>
+        <p class="section-eyebrow">{{ section.settings.eyebrow | default: 'The Collection' }}</p>
+        <h2 class="section-title">{{ section.settings.title }}</h2>
+      </div>
+      {%- if section.settings.show_view_all and collection != blank -%}
+        <a href="{{ collection.url }}" class="section-link">
+          {{ 'products.view_all' | t }}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="product-grid" data-animate="stagger">
+      {%- if collection != blank -%}
+        {%- for product in collection.products limit: product_limit -%}
+          {%- render 'product-card', product: product, lazy: forloop.first == false -%}
+        {%- else -%}
+          {%- for i in (1..product_limit) -%}
+            <div class="product-card">
+              <div class="product-card__media">
+                {{ 'product-' | append: forloop.index | placeholder_svg_tag: 'product-card__img product-card__img--primary' }}
+              </div>
+              <div class="product-card__info">
+                <p class="product-card__title">Example Product {{ forloop.index }}</p>
+                <div class="product-card__price"><span>₹1,499</span></div>
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..product_limit) -%}
+          <div class="product-card">
+            <div class="product-card__media" style="background: var(--color-surface); aspect-ratio: 3/4;"></div>
+            <div class="product-card__info">
+              <p class="product-card__title">Sample Product {{ forloop.index }}</p>
+              <div class="product-card__price"><span>₹1,499</span></div>
+            </div>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured collection",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "The Collection"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "BESTSELLERS"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Number of products",
+      "min": 2,
+      "max": 12,
+      "step": 2,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show 'View all' link",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collection",
+      "settings": {
+        "title": "BESTSELLERS",
+        "products_to_show": 4,
+        "show_view_all": true
+      }
+    }
+  ]
+}
+{% endschema %}

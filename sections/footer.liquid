@@ -1,0 +1,158 @@
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+
+    <div class="footer-grid">
+
+      <!-- Brand column -->
+      <div class="footer-brand">
+        <div class="footer-brand__logo">
+          {%- if section.settings.logo != blank -%}
+            <img src="{{ section.settings.logo | image_url: width: 180 }}" alt="{{ shop.name }}" width="140" loading="lazy">
+          {%- else -%}
+            {{ shop.name }}
+          {%- endif -%}
+        </div>
+        <p class="footer-brand__tagline">{{ section.settings.tagline | default: 'Premium streetwear made for athletes.' }}</p>
+        <div class="footer-social">
+          {%- if settings.social_instagram != blank -%}
+            <a href="{{ settings.social_instagram }}" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+              </svg>
+            </a>
+          {%- endif -%}
+          {%- if settings.social_youtube != blank -%}
+            <a href="{{ settings.social_youtube }}" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.97C18.88 4 12 4 12 4s-6.88 0-8.59.47A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.97C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.97A29 29 0 0023 12a29 29 0 00-.46-5.58z"/>
+                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/>
+              </svg>
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <!-- Nav column 1 -->
+      <nav aria-label="Footer navigation 1">
+        <p class="footer-nav__title">{{ section.settings.nav1_title | default: 'Shop' }}</p>
+        <ul class="footer-nav__links">
+          {%- for link in section.settings.nav1.links -%}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+
+      <!-- Nav column 2 -->
+      <nav aria-label="Footer navigation 2">
+        <p class="footer-nav__title">{{ section.settings.nav2_title | default: 'Support' }}</p>
+        <ul class="footer-nav__links">
+          {%- for link in section.settings.nav2.links -%}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+
+      <!-- Newsletter column -->
+      <div>
+        <p class="footer-nav__title">Stay in the loop</p>
+        <p style="font-size: var(--size-sm); color: var(--color-text-muted); line-height: 1.6; margin-bottom: 0.25rem;">
+          New drops, exclusive deals, and athlete stories — straight to your inbox.
+        </p>
+        {%- form 'customer', id: 'footer-newsletter' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="footer-newsletter__form">
+            <input
+              class="footer-newsletter__input"
+              type="email"
+              name="contact[email]"
+              placeholder="{{ 'newsletter.placeholder' | t }}"
+              required
+              autocomplete="email"
+              aria-label="{{ 'newsletter.placeholder' | t }}"
+            >
+            <button type="submit" class="footer-newsletter__btn">
+              {{ 'newsletter.submit' | t }}
+            </button>
+          </div>
+          {%- if form.posted_successfully? -%}
+            <p style="font-size: var(--size-sm); color: var(--color-accent); margin-top: 0.5rem;">{{ 'newsletter.success' | t }}</p>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copy">
+        &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.
+      </p>
+      <div class="footer-payment-icons">
+        <span>We accept:</span>
+        <span>Visa</span>
+        <span>·</span>
+        <span>Mastercard</span>
+        <span>·</span>
+        <span>UPI</span>
+        <span>·</span>
+        <span>COD</span>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Footer logo"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "Premium streetwear made for athletes."
+    },
+    {
+      "type": "header",
+      "content": "Navigation columns"
+    },
+    {
+      "type": "text",
+      "id": "nav1_title",
+      "label": "Column 1 title",
+      "default": "Shop"
+    },
+    {
+      "type": "link_list",
+      "id": "nav1",
+      "label": "Column 1 menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "text",
+      "id": "nav2_title",
+      "label": "Column 2 title",
+      "default": "Support"
+    },
+    {
+      "type": "link_list",
+      "id": "nav2",
+      "label": "Column 2 menu",
+      "default": "footer"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer"
+    }
+  ]
+}
+{% endschema %}

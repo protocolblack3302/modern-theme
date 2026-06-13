@@ -1,0 +1,13 @@
+{
+  "current": {
+    "color_bg": "#080808",
+    "color_surface": "#111111",
+    "color_accent": "#c8102e",
+    "color_text": "#f0f0f0",
+    "color_text_muted": "#888888",
+    "color_border": "#222222",
+    "heading_size_scale": "large",
+    "page_width": 1320,
+    "social_instagram": "https://www.instagram.com/athlents.co.in/"
+  }
+}
