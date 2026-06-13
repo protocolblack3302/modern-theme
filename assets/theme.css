@@ -1389,9 +1389,15 @@
 /* ─── Responsive ──────────────────────────────────────── */
 
 @media (max-width: 1024px) {
+  /* 3-column footer: Brand | Shop | Support — newsletter full-width below */
   .footer-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr;
     gap: 2rem;
+    align-items: start;
+  }
+
+  .footer-grid > *:last-child {
+    grid-column: 1 / -1;
   }
 
   .product-layout {
@@ -2559,6 +2565,12 @@ a.pagination__page:hover {
   .collection-header {
     flex-direction: column;
     align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .collection-header__count {
+    align-self: flex-start;
+    margin-top: 0.25rem;
   }
 
   /* Account forms: full-width padding */
@@ -2616,23 +2628,23 @@ a.pagination__page:hover {
     font-size: clamp(1.75rem, 7vw, 2.2rem);
   }
 
-  /* Inner pages: tight top padding on mobile — header-height + 1rem breathing room */
+  /* Inner pages: balanced top padding — header-height + 1.75rem breathing room */
   .page-content,
   .policy-section {
-    padding-top: calc(var(--header-height) + 1rem);
+    padding-top: calc(var(--header-height) + 1.75rem);
   }
 
   .collection-header {
-    padding-top: calc(var(--header-height) + 1rem);
+    padding-top: calc(var(--header-height) + 1.75rem);
     padding-bottom: 1.5rem;
   }
 
   .main-cart-container {
-    padding-top: calc(var(--header-height) + 1rem);
+    padding-top: calc(var(--header-height) + 1.75rem);
   }
 
   .breadcrumb {
-    padding-top: calc(var(--header-height) + 0.75rem);
+    padding-top: calc(var(--header-height) + 1.25rem);
   }
 }
 
