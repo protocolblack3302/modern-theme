@@ -33,6 +33,15 @@
     </div>
   </div>
 
+  <!-- Error banner -->
+  <div
+    class="cart-error-banner"
+    x-show="$store.cart.errorMessage"
+    x-text="$store.cart.errorMessage"
+    @click="$store.cart.clearError()"
+    role="alert"
+  ></div>
+
   <!-- Body -->
   <div class="cart-drawer-body">
 

@@ -36,6 +36,7 @@
   --gutter: clamp(1.25rem, 4vw, 3rem);
   --section-gap: clamp(4rem, 8vw, 8rem);
   --header-height: 56px;
+  --total-header-offset: calc(var(--announcement-height, 0px) + var(--header-height));
 
   /* Radii */
   --radius-sm: 4px;

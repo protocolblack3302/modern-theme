@@ -44,6 +44,19 @@ document.addEventListener('alpine:init', () => {
     lineVersions: {},
     activeRequests: 0,
     inventoryMap: {},
+    errorMessage: null,
+    _errorTimer: null,
+
+    showError(msg) {
+      this.errorMessage = msg;
+      if (this._errorTimer) clearTimeout(this._errorTimer);
+      this._errorTimer = setTimeout(() => { this.errorMessage = null; }, 4000);
+    },
+
+    clearError() {
+      this.errorMessage = null;
+      if (this._errorTimer) { clearTimeout(this._errorTimer); this._errorTimer = null; }
+    },
 
     async init() {
       try {
@@ -106,6 +119,18 @@ document.addEventListener('alpine:init', () => {
       this.items = cart.items || [];
       this.totalQuantity = cart.item_count || 0;
       this.totalPrice = cart.total_price || 0;
+      // Keep inventoryMap in sync from the cart API on every response.
+      // quantity_available = remaining stock AFTER deducting what's already in cart,
+      // so total stock = item.quantity + quantity_available.
+      (cart.items || []).forEach((item) => {
+        if (item.quantity_available != null) {
+          this.inventoryMap[item.variant_id] = {
+            qty: item.quantity + item.quantity_available,
+            tracked: item.inventory_management === 'shopify',
+            policy: item.inventory_policy || 'deny',
+          };
+        }
+      });
     },
 
     _recalculateTotals() {
@@ -147,8 +172,10 @@ document.addEventListener('alpine:init', () => {
         }
         await this.fetch();
         this.openDrawer();
-      } catch (e) { console.error('[Cart] addItem error', e); }
-      finally { this._setLoading(false); }
+      } catch (e) {
+        console.error('[Cart] addItem error', e);
+        this.showError('Could not add item. Please try again.');
+      } finally { this._setLoading(false); }
     },
 
     updateItem(key, quantity, options = {}) {
@@ -214,8 +241,10 @@ document.addEventListener('alpine:init', () => {
         if (this.lineVersions[key] === version) this._applyCart(cart);
       } catch (e) {
         console.error('[Cart] updateItem error', e);
-        // Revert optimistic update by syncing actual server state
-        if (this.lineVersions[key] === version) await this.fetch();
+        if (this.lineVersions[key] === version) {
+          await this.fetch();
+          this.showError('Could not update quantity. Changes reverted.');
+        }
       } finally {
         if (this.lineVersions[key] === version) this._setLinePending(key, false);
         this._setLoading(false);

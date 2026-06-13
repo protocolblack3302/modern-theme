@@ -251,6 +251,8 @@
   display: flex;
   flex-direction: column;
   padding: 2rem var(--gutter);
+  padding-top: calc(2rem + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
 }
 
 .mobile-menu-header {
@@ -320,6 +322,7 @@
   border: 0;
   pointer-events: none;
   transform: scale(1.16);
+  will-change: transform;
 }
 
 .hero-overlay {
@@ -716,6 +719,15 @@
   transform: rotate(90deg);
 }
 
+.cart-error-banner {
+  background: #7f1d1d;
+  color: #fecaca;
+  font-size: var(--size-sm);
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .cart-drawer-body {
   flex: 1;
   overflow-y: auto;
@@ -900,7 +912,7 @@
 
 .main-cart-summary {
   position: sticky;
-  top: calc(var(--header-height) + 2rem);
+  top: calc(var(--total-header-offset) + 2rem);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -1117,7 +1129,7 @@
 
 .product-gallery {
   position: sticky;
-  top: calc(var(--header-height) + 2rem);
+  top: calc(var(--total-header-offset) + 2rem);
 }
 
 .product-gallery__main {
@@ -1151,6 +1163,8 @@
   overflow-x: auto;
   scrollbar-width: none;
 }
+
+.product-gallery__thumbs::-webkit-scrollbar { display: none; }
 
 .product-gallery__thumb {
   flex-shrink: 0;
@@ -1350,7 +1364,7 @@
   text-align: center;
   min-height: 100svh;
   padding: var(--gutter);
-  padding-top: var(--header-height);
+  padding-top: var(--total-header-offset);
 }
 
 .not-found__code {
@@ -1971,7 +1985,7 @@ a.pagination__page:hover {
   align-items: start;
 }
 
-.account-sidebar { position: sticky; top: calc(var(--header-height) + 2rem); }
+.account-sidebar { position: sticky; top: calc(var(--total-header-offset) + 2rem); }
 
 .account-card {
   background: var(--color-surface);
@@ -2483,8 +2497,8 @@ a.pagination__page:hover {
 
 /* ─── Mobile — comprehensive touch & layout fixes ────── */
 
-/* Min touch target height for all interactive elements */
-@media (max-width: 768px) {
+/* Min touch target height for all interactive elements (touch screens up to tablet) */
+@media (max-width: 1024px), (pointer: coarse) {
   .btn {
     min-height: 48px;
     padding: 0.75rem 1.5rem;
@@ -2515,6 +2529,9 @@ a.pagination__page:hover {
     align-items: center;
     justify-content: center;
   }
+}
+
+@media (max-width: 768px) {
 
   /* Product page: full-width single column on mobile */
   .product-page {
@@ -2572,12 +2589,55 @@ a.pagination__page:hover {
   .cart-drawer--open {
     transform: translateY(0);
   }
+
+  /* Safe-area padding for iPhone home indicator */
+  .cart-drawer-footer {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Announcement bar: single line on mobile to keep --announcement-height predictable */
+  .announcement-bar {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0.4rem var(--gutter);
+  }
+
+  /* Hero: less aggressive min-height on phones */
+  .hero {
+    min-height: 420px;
+  }
+
+  /* Inner pages: tight top padding on mobile — header-height + 1rem breathing room */
+  .page-content,
+  .policy-section {
+    padding-top: calc(var(--header-height) + 1rem);
+  }
+
+  .collection-header {
+    padding-top: calc(var(--header-height) + 1rem);
+    padding-bottom: 1.5rem;
+  }
+
+  .main-cart-container {
+    padding-top: calc(var(--header-height) + 1rem);
+  }
+
+  .breadcrumb {
+    padding-top: calc(var(--header-height) + 0.75rem);
+  }
 }
 
 @media (max-width: 480px) {
   /* Even smaller: tighten hero */
   .hero-actions .btn {
     font-size: 0.9rem;
+  }
+
+  /* Hero height: prevent 600px min from consuming small screens */
+  .hero {
+    min-height: 320px;
+    height: 85svh;
   }
 
   /* Product grid: 2 cols, tighter gap */
