@@ -37,12 +37,21 @@ document.addEventListener('alpine:init', () => {
     totalPrice: 0,
     loading: false,
     clearing: false,
+    confirmingClear: false,
+    _confirmTimer: null,
     pendingLines: {},
     lineTimers: {},
     lineVersions: {},
     activeRequests: 0,
+    inventoryMap: {},
 
-    async init() { await this.fetch(); },
+    async init() {
+      try {
+        const el = document.getElementById('CartInventoryJSON');
+        if (el) this.inventoryMap = JSON.parse(el.textContent);
+      } catch (e) { /* non-fatal */ }
+      await this.fetch();
+    },
 
     _setBodyLock() {
       document.body.style.overflow = this.open ? 'hidden' : '';
@@ -60,6 +69,8 @@ document.addEventListener('alpine:init', () => {
 
     closeDrawer() {
       this.open = false;
+      if (this._confirmTimer) { clearTimeout(this._confirmTimer); this._confirmTimer = null; }
+      this.confirmingClear = false;
       this._setBodyLock();
     },
 
@@ -121,7 +132,7 @@ document.addEventListener('alpine:init', () => {
       } catch (e) { console.error('[Cart] fetch error', e); }
     },
 
-    async addItem(variantId, quantity = 1, properties = {}) {
+    async addItem(variantId, quantity = 1, properties = {}, inventoryInfo = null) {
       this._setLoading(true);
       try {
         const res = await fetch('/cart/add.js', {
@@ -131,6 +142,9 @@ document.addEventListener('alpine:init', () => {
         });
         if (!res.ok) throw new Error(await res.text());
         await res.json();
+        if (inventoryInfo !== null) {
+          this.inventoryMap[variantId] = inventoryInfo;
+        }
         await this.fetch();
         this.openDrawer();
       } catch (e) { console.error('[Cart] addItem error', e); }
@@ -168,7 +182,22 @@ document.addEventListener('alpine:init', () => {
     changeItem(key, delta) {
       const item = this.items.find((line) => line.key === key);
       if (!item) return;
-      this.updateItem(key, item.quantity + delta);
+
+      let newQty = item.quantity + delta;
+
+      if (delta > 0) {
+        const inv = this.inventoryMap[item.variant_id];
+        if (inv && inv.tracked && inv.policy === 'deny') {
+          newQty = Math.min(newQty, inv.qty);
+        }
+      }
+
+      this.updateItem(key, newQty);
+    },
+
+    atStockLimit(item) {
+      const inv = this.inventoryMap[item.variant_id];
+      return Boolean(inv && inv.tracked && inv.policy === 'deny' && item.quantity >= inv.qty);
     },
 
     async commitItem(key, quantity, version) {
@@ -183,8 +212,11 @@ document.addEventListener('alpine:init', () => {
         if (!res.ok) throw new Error(await res.text());
         const cart = await res.json();
         if (this.lineVersions[key] === version) this._applyCart(cart);
-      } catch (e) { console.error('[Cart] updateItem error', e); }
-      finally {
+      } catch (e) {
+        console.error('[Cart] updateItem error', e);
+        // Revert optimistic update by syncing actual server state
+        if (this.lineVersions[key] === version) await this.fetch();
+      } finally {
         if (this.lineVersions[key] === version) this._setLinePending(key, false);
         this._setLoading(false);
       }
@@ -194,8 +226,22 @@ document.addEventListener('alpine:init', () => {
       this.updateItem(key, 0, { immediate: true });
     },
 
-    async clear() {
-      if (!window.confirm('Clear every item from your cart?')) return;
+    requestClear() {
+      if (this.confirmingClear) {
+        clearTimeout(this._confirmTimer);
+        this._confirmTimer = null;
+        this.confirmingClear = false;
+        this._executeClear();
+      } else {
+        this.confirmingClear = true;
+        this._confirmTimer = setTimeout(() => {
+          this.confirmingClear = false;
+          this._confirmTimer = null;
+        }, 3000);
+      }
+    },
+
+    async _executeClear() {
       Object.values(this.lineTimers).forEach(clearTimeout);
       this.lineTimers = {};
       this.pendingLines = {};
@@ -316,6 +362,24 @@ document.addEventListener('alpine:init', () => {
       return this.inventory[v.id] || null;
     },
 
+    get maxAddable() {
+      const si = this.stockInfo;
+      if (!si || !si.tracked || si.policy !== 'deny') return 9999;
+      const inCart = Alpine.store('cart').items.find(
+        (i) => i.variant_id === this.selectedVariantId
+      )?.quantity || 0;
+      return Math.max(0, si.qty - inCart);
+    },
+
+    get atCartLimit() {
+      const si = this.stockInfo;
+      if (!si || !si.tracked || si.policy !== 'deny') return false;
+      const inCart = Alpine.store('cart').items.find(
+        (i) => i.variant_id === this.selectedVariantId
+      )?.quantity || 0;
+      return inCart >= si.qty;
+    },
+
     /* CSS class for the stock dot: in / low / out */
     get stockState() {
       const v = this.currentVariant;
@@ -338,10 +402,12 @@ document.addEventListener('alpine:init', () => {
 
     selectOption(name, value) {
       this.selectedOptions[name] = value;
+      this.quantity = 1;
+      this.addedToCart = false;
       const v = this.currentVariant;
       if (v) {
         this.selectedVariantId = v.id;
-        /* Swap to variant's featured image if it has one */
+        window.history.replaceState({}, '', '?variant=' + v.id);
         if (v.featured_image && this.product.images) {
           const idx = this.product.images.findIndex((img) => img.id === v.featured_image.id);
           if (idx >= 0) this.setActiveImage(idx);
@@ -364,12 +430,6 @@ document.addEventListener('alpine:init', () => {
     /* index-only: URLs come from pre-rendered imagesData to avoid JS-string quoting issues */
     setActiveImage(index) {
       this.activeImageIndex = index;
-      const img = this.$refs && this.$refs.mainImage;
-      const data = this.images[index];
-      if (img && data) {
-        img.src = data.src900;
-        img.alt = data.alt || '';
-      }
     },
 
     formatMoney(cents) {
@@ -381,9 +441,14 @@ document.addEventListener('alpine:init', () => {
 
     async addToCart() {
       if (!this.selectedVariantId || this.addingToCart) return;
+      const qty = Math.min(this.quantity, this.maxAddable);
+      if (qty <= 0) return;
       this.addingToCart = true;
-      await Alpine.store('cart').addItem(this.selectedVariantId, this.quantity);
+      const si = this.stockInfo;
+      const invInfo = si ? { qty: si.qty, tracked: si.tracked, policy: si.policy ?? 'deny' } : null;
+      await Alpine.store('cart').addItem(this.selectedVariantId, qty, {}, invInfo);
       this.addingToCart = false;
+      this.quantity = 1;
       this.addedToCart = true;
       setTimeout(() => { this.addedToCart = false; }, 2500);
     },
@@ -406,20 +471,18 @@ document.addEventListener('alpine:init', () => {
   setHeaderOffset();
   window.addEventListener('resize', setHeaderOffset, { passive: true });
 
-  /* On non-index pages force the solid state immediately */
   const isHomepage = document.body.classList.contains('template-index');
 
-  if (!isHomepage) {
-    header.setAttribute('data-scrolled', '');
-  }
-
   window.addEventListener('scroll', () => {
-    if (isHomepage) {
-      if (window.scrollY > 60) {
-        header.setAttribute('data-scrolled', '');
-      } else {
-        header.removeAttribute('data-scrolled');
-      }
+    const barHeight = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--announcement-height')
+    ) || 0;
+    // Move header to top only once the announcement bar has scrolled away
+    if (window.scrollY >= barHeight) {
+      header.setAttribute('data-scrolled', '');
+    } else {
+      header.removeAttribute('data-scrolled');
+      // Non-homepage keeps solid bg via data-solid attribute in HTML
     }
   }, { passive: true });
 })();

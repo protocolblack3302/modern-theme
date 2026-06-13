@@ -16,12 +16,12 @@
       <button
         type="button"
         class="cart-drawer-clear"
+        :class="{ 'cart-drawer-clear--confirming': $store.cart.confirmingClear }"
         x-show="$store.cart.items.length > 0"
-        @click="$store.cart.clear()"
+        @click="$store.cart.requestClear()"
         :disabled="$store.cart.clearing"
-      >
-        Clear cart
-      </button>
+        x-text="$store.cart.confirmingClear ? 'Tap again to confirm' : 'Clear cart'"
+      ></button>
       <button
         type="button"
         class="cart-drawer-close header-icon-btn"
@@ -70,7 +70,7 @@
 
             <p class="cart-item__variant" x-show="item.variant_title && item.variant_title !== 'Default Title'" x-text="item.variant_title"></p>
 
-            <p class="cart-item__price" x-text="$store.cart.formattedPrice(item.price)"></p>
+            <p class="cart-item__price" x-text="$store.cart.formattedPrice(item.final_price ?? item.price)"></p>
 
             <div class="cart-item__footer">
               <!-- Qty control -->
@@ -79,7 +79,7 @@
                   type="button"
                   class="qty-btn"
                   @click="$store.cart.changeItem(item.key, -1)"
-                  :disabled="$store.cart.clearing"
+                  :disabled="$store.cart.clearing || $store.cart.linePending(item.key)"
                   aria-label="Decrease quantity"
                 >−</button>
                 <span class="qty-value" x-text="item.quantity"></span>
@@ -87,7 +87,7 @@
                   type="button"
                   class="qty-btn"
                   @click="$store.cart.changeItem(item.key, 1)"
-                  :disabled="$store.cart.clearing"
+                  :disabled="$store.cart.clearing || $store.cart.linePending(item.key) || $store.cart.atStockLimit(item)"
                   aria-label="Increase quantity"
                 >+</button>
               </div>

@@ -1,4 +1,4 @@
-<header class="site-header" role="banner">
+<header class="site-header" role="banner" {% unless template.name == 'index' %}data-solid{% endunless %}>
   <div class="header-inner">
 
     <!-- Desktop nav (left) -->
@@ -60,6 +60,7 @@
         {%- render 'icon-cart' -%}
         <span
           class="cart-count"
+          x-show="$store.cart.totalQuantity > 0"
           :data-count="$store.cart.totalQuantity"
           x-text="$store.cart.totalQuantity"
         ></span>

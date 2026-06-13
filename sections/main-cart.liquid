@@ -1,4 +1,4 @@
-<div class="section">
+<div class="section" style="padding-top: 0;">
   <div class="container main-cart-container">
     <h1 class="section-title main-cart-title" data-animate="fade-up">{{ 'cart.title' | t }}</h1>
 
@@ -25,12 +25,20 @@
                   {%- unless item.variant.title == 'Default Title' -%}
                     <p class="cart-item__variant">{{ item.variant.title }}</p>
                   {%- endunless -%}
-                  <p class="cart-item__price">{{ item.price | money }}</p>
+                  <p class="cart-item__price">{{ item.final_price | money }}</p>
                   <div class="cart-item__footer">
                     <div class="qty-control">
                       <a href="{{ routes.cart_change_url }}?id={{ item.key | url_encode }}&quantity={{ item.quantity | minus: 1 }}" class="qty-btn" aria-label="Decrease quantity">−</a>
                       <span class="qty-value">{{ item.quantity }}</span>
-                      <a href="{{ routes.cart_change_url }}?id={{ item.key | url_encode }}&quantity={{ item.quantity | plus: 1 }}" class="qty-btn" aria-label="Increase quantity">+</a>
+                      {%- assign _at_max = false -%}
+                      {%- if item.variant.inventory_management != blank and item.variant.inventory_policy == 'deny' and item.quantity >= item.variant.inventory_quantity -%}
+                        {%- assign _at_max = true -%}
+                      {%- endif -%}
+                      {%- if _at_max -%}
+                        <span class="qty-btn qty-btn--disabled" aria-disabled="true" aria-label="Increase quantity">+</span>
+                      {%- else -%}
+                        <a href="{{ routes.cart_change_url }}?id={{ item.key | url_encode }}&quantity={{ item.quantity | plus: 1 }}" class="qty-btn" aria-label="Increase quantity">+</a>
+                      {%- endif -%}
                     </div>
                     <a href="{{ routes.cart_change_url }}?id={{ item.key | url_encode }}&quantity=0" class="cart-item__remove">{{ 'cart.remove' | t }}</a>
                   </div>

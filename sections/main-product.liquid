@@ -20,7 +20,7 @@
 <script id="ProductInventoryJSON-{{ product.id }}" type="application/json">
   {
     {%- for v in product.variants -%}
-      "{{ v.id }}": {"qty": {{ v.inventory_quantity | default: 0 }}, "tracked": {% if v.inventory_management != blank %}true{% else %}false{% endif %}, "available": {{ v.available }}}{% unless forloop.last %},{% endunless %}
+      "{{ v.id }}": {"qty": {{ v.inventory_quantity | default: 0 }}, "tracked": {% if v.inventory_management != blank %}true{% else %}false{% endif %}, "policy": {{ v.inventory_policy | json }}, "available": {{ v.available }}}{% unless forloop.last %},{% endunless %}
     {%- endfor -%}
   }
 </script>
@@ -32,15 +32,12 @@
   <!-- Breadcrumb -->
   <div class="container">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="{{ routes.root_url }}" class="breadcrumb__link">Home</a>
-      <span class="breadcrumb__sep" aria-hidden="true">→</span>
       {%- if collection -%}
         <a href="{{ collection.url }}" class="breadcrumb__link">{{ collection.title }}</a>
-        <span class="breadcrumb__sep" aria-hidden="true">→</span>
       {%- else -%}
         <a href="{{ routes.all_products_collection_url }}" class="breadcrumb__link">Shop</a>
-        <span class="breadcrumb__sep" aria-hidden="true">→</span>
       {%- endif -%}
+      <span class="breadcrumb__sep" aria-hidden="true">→</span>
       <span class="breadcrumb__current" aria-current="page">{{ product.title }}</span>
     </nav>
   </div>
@@ -52,15 +49,18 @@
       <div class="product-gallery">
 
         <div class="product-gallery__main">
-          <img
-            x-ref="mainImage"
-            src="{{ featured_image | image_url: width: 900 }}"
-            alt="{{ featured_image.alt | escape | default: product.title | escape }}"
-            width="900"
-            height="1200"
-            loading="eager"
-            fetchpriority="high"
-          >
+          {%- for image in product.images -%}
+            <img
+              class="product-gallery__main-img{% if forloop.first %} active{% endif %}"
+              :class="{ active: activeImageIndex === {{ forloop.index0 }} }"
+              src="{{ image | image_url: width: 900 }}"
+              alt="{{ image.alt | escape | default: product.title | escape }}"
+              width="900"
+              height="1200"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+              {% if forloop.first %}fetchpriority="high"{% endif %}
+            >
+          {%- endfor -%}
         </div>
 
         {%- if product.images.size > 1 -%}
@@ -143,13 +143,18 @@
           <div class="qty-control" style="display: inline-flex; padding: 0.5rem 0.75rem;">
             <button class="qty-btn" @click="quantity = Math.max(1, quantity - 1)" aria-label="Decrease">−</button>
             <span class="qty-value" x-text="quantity"></span>
-            <button class="qty-btn" @click="quantity++" aria-label="Increase">+</button>
+            <button
+              class="qty-btn"
+              @click="quantity = Math.min(quantity + 1, maxAddable)"
+              :disabled="quantity >= maxAddable"
+              aria-label="Increase"
+            >+</button>
           </div>
         </div>
 
         <!-- Add to cart -->
         <div class="product-details__atc">
-          <template x-if="currentVariant && currentVariant.available">
+          <template x-if="currentVariant && currentVariant.available && !atCartLimit">
             <button
               class="btn btn--primary btn--full"
               @click="addToCart()"
@@ -158,6 +163,11 @@
               <span x-show="!addingToCart && !addedToCart">Add to Cart</span>
               <span x-show="addingToCart" style="display:none">Adding...</span>
               <span x-show="addedToCart" style="display:none">Added ✓</span>
+            </button>
+          </template>
+          <template x-if="currentVariant && currentVariant.available && atCartLimit">
+            <button class="btn btn--ghost btn--full" disabled style="opacity:0.65; cursor:not-allowed;">
+              Max qty in cart
             </button>
           </template>
           <template x-if="!currentVariant || !currentVariant.available">

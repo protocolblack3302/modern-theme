@@ -21,7 +21,7 @@
   endif
 -%}
 
-<article class="product-card" data-animate="fade-up">
+<article class="product-card">
   <div class="product-card__media">
     <a href="{{ product.url }}" class="product-card__media-link" aria-label="{{ product.title | escape }}">
 
@@ -63,11 +63,12 @@
     {%- if product.available -%}
       <div class="product-card__quick-add">
         {%- if product.variants.size == 1 -%}
+          {%- assign _qv = product.first_available_variant -%}
           <button
             type="button"
             class="btn btn--primary"
             style="padding: 0.6rem 1.1rem; font-size: 0.85rem;"
-            @click="$store.cart.addItem({{ product.first_available_variant.id }}, 1)"
+            @click="$store.cart.addItem({{ _qv.id }}, 1, {}, {qty: {{ _qv.inventory_quantity | default: 0 }}, tracked: {{ _qv.inventory_management | json }} !== null, policy: {{ _qv.inventory_policy | json }}})"
             :disabled="$store.cart.loading"
           >
             {{ 'cart.add_to_cart' | t }}

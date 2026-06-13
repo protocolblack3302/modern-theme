@@ -1,8 +1,8 @@
 {%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
 
-<div class="section" style="padding-top: calc(var(--header-height) + 3rem); padding-bottom: 0;">
+<div class="section" style="padding-block: 0;">
   <div class="container">
-    <div class="collection-header" data-animate="fade-up">
+    <div class="collection-header">
       <div>
         <h1 class="collection-header__title">{{ collection.title }}</h1>
         {%- if collection.description != blank -%}
@@ -12,7 +12,7 @@
       <p class="collection-header__count">{{ collection.products_count }} products</p>
     </div>
 
-    <div class="collection-toolbar" data-animate="fade-up">
+    <div class="collection-toolbar">
       <form method="get" action="{{ collection.url }}" class="collection-sort">
         <label for="sort-by" class="collection-sort__label">Sort by</label>
         <div class="collection-sort__select-wrap">
