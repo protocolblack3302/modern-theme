@@ -22,8 +22,8 @@
 -%}
 
 <article class="product-card" data-animate="fade-up">
-  <a href="{{ product.url }}" class="product-card__media-link" aria-label="{{ product.title | escape }}">
-    <div class="product-card__media">
+  <div class="product-card__media">
+    <a href="{{ product.url }}" class="product-card__media-link" aria-label="{{ product.title | escape }}">
 
       {%- if primary_image -%}
         <img
@@ -57,29 +57,29 @@
           <span class="product-card__badge product-card__badge--sale">{{ 'products.sale' | t }}</span>
         {%- endif -%}
       {%- endunless -%}
+    </a>
 
-      <!-- Quick add -->
-      {%- if product.available -%}
-        <div class="product-card__quick-add">
-          {%- if product.variants.size == 1 -%}
-            <button
-              class="btn btn--primary"
-              style="padding: 0.6rem 1.1rem; font-size: 0.85rem;"
-              @click.prevent="$store.cart.addItem({{ product.first_available_variant.id }}, 1)"
-              :disabled="$store.cart.loading"
-            >
-              {{ 'cart.add_to_cart' | t }}
-            </button>
-          {%- else -%}
-            <a href="{{ product.url }}" class="btn btn--primary" style="padding: 0.6rem 1.1rem; font-size: 0.85rem;">
-              {{ 'products.view_all' | t }}
-            </a>
-          {%- endif -%}
-        </div>
-      {%- endif -%}
-
-    </div>
-  </a>
+    <!-- Quick add -->
+    {%- if product.available -%}
+      <div class="product-card__quick-add">
+        {%- if product.variants.size == 1 -%}
+          <button
+            type="button"
+            class="btn btn--primary"
+            style="padding: 0.6rem 1.1rem; font-size: 0.85rem;"
+            @click="$store.cart.addItem({{ product.first_available_variant.id }}, 1)"
+            :disabled="$store.cart.loading"
+          >
+            {{ 'cart.add_to_cart' | t }}
+          </button>
+        {%- else -%}
+          <a href="{{ product.url }}" class="btn btn--primary" style="padding: 0.6rem 1.1rem; font-size: 0.85rem;">
+            {{ 'products.view_all' | t }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
 
   <div class="product-card__info">
     <a href="{{ product.url }}">

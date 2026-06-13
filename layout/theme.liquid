@@ -33,11 +33,11 @@
   {{ 'theme.css' | asset_url | stylesheet_tag }}
 
   <!-- GSAP + ScrollTrigger (load before theme.js so animations are available) -->
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
   <!-- Lenis smooth scroll -->
-  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
 
   <!-- theme.js MUST load before Alpine so its alpine:init listeners
        (Alpine.store('cart') + Alpine.data('productPage')) are registered
@@ -79,7 +79,7 @@
   <div
     class="overlay"
     :class="{ 'overlay--visible': $store.cart.open }"
-    @click="$store.cart.open = false"
+    @click="$store.cart.closeDrawer()"
   ></div>
 
   <main id="main-content" tabindex="-1">

@@ -1,10 +1,10 @@
 <div class="section">
-  <div class="container" style="padding-top: calc(72px + 3rem);">
-    <h1 class="section-title" style="margin-bottom: 2rem;" data-animate="fade-up">{{ 'cart.title' | t }}</h1>
+  <div class="container main-cart-container">
+    <h1 class="section-title main-cart-title" data-animate="fade-up">{{ 'cart.title' | t }}</h1>
 
     {%- if cart.item_count > 0 -%}
-      <form action="/cart" method="post" novalidate>
-        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 3rem; align-items: start;">
+      <form action="{{ routes.cart_url }}" method="post" novalidate>
+        <div class="main-cart-layout">
 
           <!-- Items -->
           <div>
@@ -28,11 +28,11 @@
                   <p class="cart-item__price">{{ item.price | money }}</p>
                   <div class="cart-item__footer">
                     <div class="qty-control">
-                      <a href="/cart/change?id={{ item.id }}&quantity={{ item.quantity | minus: 1 }}" class="qty-btn">−</a>
+                      <a href="{{ routes.cart_change_url }}?id={{ item.key | url_encode }}&quantity={{ item.quantity | minus: 1 }}" class="qty-btn" aria-label="Decrease quantity">−</a>
                       <span class="qty-value">{{ item.quantity }}</span>
-                      <a href="/cart/change?id={{ item.id }}&quantity={{ item.quantity | plus: 1 }}" class="qty-btn">+</a>
+                      <a href="{{ routes.cart_change_url }}?id={{ item.key | url_encode }}&quantity={{ item.quantity | plus: 1 }}" class="qty-btn" aria-label="Increase quantity">+</a>
                     </div>
-                    <a href="/cart/change?id={{ item.id }}&quantity=0" class="cart-item__remove">{{ 'cart.remove' | t }}</a>
+                    <a href="{{ routes.cart_change_url }}?id={{ item.key | url_encode }}&quantity=0" class="cart-item__remove">{{ 'cart.remove' | t }}</a>
                   </div>
                 </div>
               </div>
@@ -40,23 +40,23 @@
           </div>
 
           <!-- Summary -->
-          <div style="position: sticky; top: calc(72px + 2rem); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.75rem; display: flex; flex-direction: column; gap: 1.25rem;">
-            <h2 style="font-size: 1.4rem;">Order Summary</h2>
+          <div class="main-cart-summary">
+            <h2 class="main-cart-summary__title">{{ 'cart.subtotal' | t }}</h2>
             <div class="cart-subtotal">
               <span class="cart-subtotal__label">{{ 'cart.subtotal' | t }}</span>
               <span class="cart-subtotal__amount">{{ cart.total_price | money }}</span>
             </div>
             <p class="cart-note">Taxes and shipping calculated at checkout</p>
             <button type="submit" name="checkout" class="btn btn--primary btn--full">{{ 'cart.checkout' | t }}</button>
-            <a href="/collections/all" class="btn btn--ghost btn--full">{{ 'cart.continue_shopping' | t }}</a>
+            <a href="{{ routes.all_products_collection_url }}" class="btn btn--ghost btn--full">{{ 'cart.continue_shopping' | t }}</a>
           </div>
 
         </div>
       </form>
     {%- else -%}
-      <div style="text-align: center; padding: 5rem 0; color: var(--color-text-muted);">
-        <p style="margin-bottom: 2rem; font-size: 1.1rem;">{{ 'cart.empty' | t }}</p>
-        <a href="/collections/all" class="btn btn--primary">{{ 'cart.continue_shopping' | t }}</a>
+      <div class="main-cart-empty">
+        <p class="main-cart-empty__text">{{ 'cart.empty' | t }}</p>
+        <a href="{{ routes.all_products_collection_url }}" class="btn btn--primary">{{ 'cart.continue_shopping' | t }}</a>
       </div>
     {%- endif -%}
   </div>

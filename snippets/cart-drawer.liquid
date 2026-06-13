@@ -1,7 +1,9 @@
 <div
   class="cart-drawer"
   :class="{ 'cart-drawer--open': $store.cart.open }"
-  @keydown.escape.window="$store.cart.open = false"
+  @keydown.escape.window="$store.cart.closeDrawer()"
+  @keydown.tab="$store.cart.trapFocus($event)"
+  tabindex="-1"
   role="dialog"
   aria-label="{{ 'cart.title' | t }}"
   aria-modal="true"
@@ -10,13 +12,25 @@
   <!-- Header -->
   <div class="cart-drawer-header">
     <h2 class="cart-drawer-title">{{ 'cart.title' | t }}</h2>
-    <button
-      class="cart-drawer-close header-icon-btn"
-      @click="$store.cart.open = false"
-      aria-label="{{ 'general.close' | t }}"
-    >
-      {%- render 'icon-close' -%}
-    </button>
+    <div class="cart-drawer-header__actions">
+      <button
+        type="button"
+        class="cart-drawer-clear"
+        x-show="$store.cart.items.length > 0"
+        @click="$store.cart.clear()"
+        :disabled="$store.cart.clearing"
+      >
+        Clear cart
+      </button>
+      <button
+        type="button"
+        class="cart-drawer-close header-icon-btn"
+        @click="$store.cart.closeDrawer()"
+        aria-label="{{ 'general.close' | t }}"
+      >
+        {%- render 'icon-close' -%}
+      </button>
+    </div>
   </div>
 
   <!-- Body -->
@@ -28,7 +42,7 @@
         {%- render 'icon-cart' -%}
       </div>
       <p>{{ 'cart.empty' | t }}</p>
-      <button class="btn btn--ghost" @click="$store.cart.open = false">
+      <button type="button" class="btn btn--ghost" @click="$store.cart.closeDrawer()">
         {{ 'cart.continue_shopping' | t }}
       </button>
     </div>
@@ -36,7 +50,7 @@
     <!-- Items list -->
     <div x-show="$store.cart.items.length > 0">
       <template x-for="item in $store.cart.items" :key="item.key">
-        <div class="cart-item">
+        <div class="cart-item" :class="{ 'cart-item--updating': $store.cart.linePending(item.key) }">
 
           <!-- Product image -->
           <a :href="item.url">
@@ -62,24 +76,27 @@
               <!-- Qty control -->
               <div class="qty-control">
                 <button
+                  type="button"
                   class="qty-btn"
-                  @click="$store.cart.updateItem(item.key, item.quantity - 1)"
-                  :disabled="item.quantity <= 1 || $store.cart.loading"
+                  @click="$store.cart.changeItem(item.key, -1)"
+                  :disabled="$store.cart.clearing"
                   aria-label="Decrease quantity"
                 >−</button>
                 <span class="qty-value" x-text="item.quantity"></span>
                 <button
+                  type="button"
                   class="qty-btn"
-                  @click="$store.cart.updateItem(item.key, item.quantity + 1)"
-                  :disabled="$store.cart.loading"
+                  @click="$store.cart.changeItem(item.key, 1)"
+                  :disabled="$store.cart.clearing"
                   aria-label="Increase quantity"
                 >+</button>
               </div>
 
               <button
+                type="button"
                 class="cart-item__remove"
                 @click="$store.cart.removeItem(item.key)"
-                :disabled="$store.cart.loading"
+                :disabled="$store.cart.clearing"
               >
                 {{ 'cart.remove' | t }}
               </button>
@@ -99,9 +116,11 @@
       <span class="cart-subtotal__amount" x-text="$store.cart.formattedTotal"></span>
     </div>
 
-    <a href="/checkout" class="btn btn--primary btn--full">
-      {{ 'cart.checkout' | t }}
-    </a>
+    <form action="{{ routes.cart_url }}" method="post">
+      <button type="submit" name="checkout" class="btn btn--primary btn--full">
+        {{ 'cart.checkout' | t }}
+      </button>
+    </form>
 
     <p class="cart-note">Taxes and shipping calculated at checkout</p>
   </div>

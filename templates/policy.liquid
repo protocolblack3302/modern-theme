@@ -1,15 +1,14 @@
 {% layout 'theme' %}
 
-<div style="padding-top: calc(72px + 4rem); padding-bottom: var(--section-gap);">
+<div class="policy-section" data-animate="fade-up">
   <div class="container">
-    <div class="page-content" data-animate="fade-up">
+    <div class="policy-body">
 
       {%- if policy == blank -%}
         <h1>Policy</h1>
-        <p style="color: var(--color-text-muted);">This policy has not been added yet.</p>
+        <p class="policy-empty">This policy has not been added yet.</p>
       {%- else -%}
-        <h1>{{ policy.title }}</h1>
-        <div class="rte" style="margin-top: 2rem;">{{ policy.body }}</div>
+        {{ policy.body }}
       {%- endif -%}
 
     </div>

@@ -7,7 +7,9 @@
       <div class="footer-brand">
         <div class="footer-brand__logo">
           {%- if section.settings.logo != blank -%}
-            <img src="{{ section.settings.logo | image_url: width: 180 }}" alt="{{ shop.name }}" width="140" loading="lazy">
+            {%- assign footer_logo_width = 140 -%}
+            {%- assign footer_logo_height = footer_logo_width | divided_by: section.settings.logo.aspect_ratio | round -%}
+            <img src="{{ section.settings.logo | image_url: width: 180 }}" alt="{{ shop.name }}" width="{{ footer_logo_width }}" height="{{ footer_logo_height }}" loading="lazy">
           {%- else -%}
             {{ shop.name }}
           {%- endif -%}

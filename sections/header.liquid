@@ -8,8 +8,8 @@
           {{ link.title }}
         </a>
       {%- else -%}
-        <a href="/">Home</a>
-        <a href="/collections/all">Shop</a>
+        <a href="{{ routes.root_url }}">Home</a>
+        <a href="{{ routes.all_products_collection_url }}">Shop</a>
         <a href="/pages/about">About</a>
         <a href="/pages/contact">Contact</a>
       {%- endfor -%}
@@ -17,13 +17,14 @@
 
     <!-- Logo (center) -->
     <div class="header-logo">
-      <a href="/" aria-label="{{ shop.name }}">
+      <a href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
         {%- if section.settings.logo != blank -%}
+          {%- assign logo_height = section.settings.logo_width | divided_by: section.settings.logo.aspect_ratio | round -%}
           <img
-            src="{{ section.settings.logo | image_url: width: 260 }}"
+            src="{{ section.settings.logo | image_url: width: section.settings.logo_width }}"
             alt="{{ shop.name }}"
             width="{{ section.settings.logo_width }}"
-            height="auto"
+            height="{{ logo_height }}"
             loading="eager"
           >
         {%- else -%}
@@ -36,7 +37,7 @@
     <div class="header-actions">
 
       <!-- Search -->
-      <a href="/search" class="header-icon-btn" aria-label="Search">
+      <a href="{{ routes.search_url }}" class="header-icon-btn" aria-label="Search">
         {%- render 'icon-search' -%}
       </a>
 
@@ -51,8 +52,9 @@
 
       <!-- Cart -->
       <button
+        type="button"
         class="header-icon-btn"
-        @click="$store.cart.open = true"
+        @click="$store.cart.openDrawer()"
         aria-label="{{ 'cart.title' | t }}"
       >
         {%- render 'icon-cart' -%}
@@ -65,6 +67,7 @@
 
       <!-- Mobile hamburger -->
       <button
+        type="button"
         class="header-icon-btn header-hamburger"
         @click="$store.menu.toggle()"
         aria-label="Open menu"
@@ -89,15 +92,17 @@
 >
   <div class="mobile-menu-header">
     <div class="header-logo">
-      <a href="/" @click="$store.menu.close()">
+      <a href="{{ routes.root_url }}" @click="$store.menu.close()">
         {%- if section.settings.logo != blank -%}
-          <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="{{ section.settings.logo_width | divided_by: 2 }}" loading="lazy">
+          {%- assign mobile_logo_width = section.settings.logo_width | divided_by: 2 -%}
+          {%- assign mobile_logo_height = mobile_logo_width | divided_by: section.settings.logo.aspect_ratio | round -%}
+          <img src="{{ section.settings.logo | image_url: width: mobile_logo_width }}" alt="{{ shop.name }}" width="{{ mobile_logo_width }}" height="{{ mobile_logo_height }}" loading="lazy">
         {%- else -%}
           {{ shop.name }}
         {%- endif -%}
       </a>
     </div>
-    <button class="header-icon-btn" @click="$store.menu.close()" aria-label="Close menu">
+    <button type="button" class="header-icon-btn" @click="$store.menu.close()" aria-label="Close menu">
       {%- render 'icon-close' -%}
     </button>
   </div>
@@ -106,8 +111,8 @@
     {%- for link in section.settings.menu.links -%}
       <a href="{{ link.url }}" @click="$store.menu.close()">{{ link.title }}</a>
     {%- else -%}
-      <a href="/" @click="$store.menu.close()">Home</a>
-      <a href="/collections/all" @click="$store.menu.close()">Shop</a>
+      <a href="{{ routes.root_url }}" @click="$store.menu.close()">Home</a>
+      <a href="{{ routes.all_products_collection_url }}" @click="$store.menu.close()">Shop</a>
       <a href="/pages/about" @click="$store.menu.close()">About</a>
       <a href="/pages/contact" @click="$store.menu.close()">Contact</a>
     {%- endfor -%}

@@ -36,21 +36,93 @@ document.addEventListener('alpine:init', () => {
     totalQuantity: 0,
     totalPrice: 0,
     loading: false,
+    clearing: false,
+    pendingLines: {},
+    lineTimers: {},
+    lineVersions: {},
+    activeRequests: 0,
 
     async init() { await this.fetch(); },
+
+    _setBodyLock() {
+      document.body.style.overflow = this.open ? 'hidden' : '';
+    },
+
+    openDrawer() {
+      this.open = true;
+      this._setBodyLock();
+      setTimeout(() => {
+        const drawer = document.querySelector('.cart-drawer');
+        const close = drawer?.querySelector('.cart-drawer-close');
+        (close || drawer)?.focus();
+      }, 0);
+    },
+
+    closeDrawer() {
+      this.open = false;
+      this._setBodyLock();
+    },
+
+    trapFocus(event) {
+      if (!this.open) return;
+      const drawer = document.querySelector('.cart-drawer');
+      if (!drawer) return;
+
+      const focusable = drawer.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    },
+
+    _setLoading(isLoading) {
+      this.activeRequests += isLoading ? 1 : -1;
+      this.activeRequests = Math.max(0, this.activeRequests);
+      this.loading = this.activeRequests > 0;
+    },
+
+    _applyCart(cart) {
+      this.items = cart.items || [];
+      this.totalQuantity = cart.item_count || 0;
+      this.totalPrice = cart.total_price || 0;
+    },
+
+    _recalculateTotals() {
+      this.totalQuantity = this.items.reduce((sum, item) => sum + item.quantity, 0);
+      this.totalPrice = this.items.reduce((sum, item) => {
+        const unitPrice = item.final_price ?? item.price ?? 0;
+        return sum + (unitPrice * item.quantity);
+      }, 0);
+    },
+
+    _setLinePending(key, isPending) {
+      this.pendingLines = { ...this.pendingLines, [key]: isPending };
+    },
+
+    linePending(key) {
+      return Boolean(this.pendingLines[key]);
+    },
 
     async fetch() {
       try {
         const res = await fetch('/cart.js');
         const cart = await res.json();
-        this.items = cart.items;
-        this.totalQuantity = cart.item_count;
-        this.totalPrice = cart.total_price;
+        this._applyCart(cart);
       } catch (e) { console.error('[Cart] fetch error', e); }
     },
 
     async addItem(variantId, quantity = 1, properties = {}) {
-      this.loading = true;
+      this._setLoading(true);
       try {
         const res = await fetch('/cart/add.js', {
           method: 'POST',
@@ -58,14 +130,50 @@ document.addEventListener('alpine:init', () => {
           body: JSON.stringify({ id: variantId, quantity, properties }),
         });
         if (!res.ok) throw new Error(await res.text());
+        await res.json();
         await this.fetch();
-        this.open = true;
+        this.openDrawer();
       } catch (e) { console.error('[Cart] addItem error', e); }
-      finally { this.loading = false; }
+      finally { this._setLoading(false); }
     },
 
-    async updateItem(key, quantity) {
-      this.loading = true;
+    updateItem(key, quantity, options = {}) {
+      const normalizedQuantity = Math.max(0, Number(quantity) || 0);
+      const item = this.items.find((line) => line.key === key);
+      if (!item && normalizedQuantity > 0) return;
+
+      if (this.lineTimers[key]) clearTimeout(this.lineTimers[key]);
+
+      if (item) {
+        if (normalizedQuantity === 0) {
+          this.items = this.items.filter((line) => line.key !== key);
+        } else {
+          this.items = this.items.map((line) =>
+            line.key === key ? { ...line, quantity: normalizedQuantity } : line
+          );
+        }
+        this._recalculateTotals();
+      }
+
+      this._setLinePending(key, true);
+      this.lineVersions[key] = (this.lineVersions[key] || 0) + 1;
+      const version = this.lineVersions[key];
+
+      const delay = options.immediate ? 0 : 220;
+      this.lineTimers[key] = setTimeout(() => {
+        this.commitItem(key, normalizedQuantity, version);
+      }, delay);
+    },
+
+    changeItem(key, delta) {
+      const item = this.items.find((line) => line.key === key);
+      if (!item) return;
+      this.updateItem(key, item.quantity + delta);
+    },
+
+    async commitItem(key, quantity, version) {
+      delete this.lineTimers[key];
+      this._setLoading(true);
       try {
         const res = await fetch('/cart/change.js', {
           method: 'POST',
@@ -73,12 +181,44 @@ document.addEventListener('alpine:init', () => {
           body: JSON.stringify({ id: key, quantity }),
         });
         if (!res.ok) throw new Error(await res.text());
-        await this.fetch();
+        const cart = await res.json();
+        if (this.lineVersions[key] === version) this._applyCart(cart);
       } catch (e) { console.error('[Cart] updateItem error', e); }
-      finally { this.loading = false; }
+      finally {
+        if (this.lineVersions[key] === version) this._setLinePending(key, false);
+        this._setLoading(false);
+      }
     },
 
-    async removeItem(key) { await this.updateItem(key, 0); },
+    removeItem(key) {
+      this.updateItem(key, 0, { immediate: true });
+    },
+
+    async clear() {
+      if (!window.confirm('Clear every item from your cart?')) return;
+      Object.values(this.lineTimers).forEach(clearTimeout);
+      this.lineTimers = {};
+      this.pendingLines = {};
+      this.lineVersions = {};
+      this.clearing = true;
+      this._setLoading(true);
+      this.items = [];
+      this.totalQuantity = 0;
+      this.totalPrice = 0;
+
+      try {
+        const res = await fetch('/cart/clear.js', { method: 'POST' });
+        if (!res.ok) throw new Error(await res.text());
+        const cart = await res.json();
+        this._applyCart(cart);
+      } catch (e) {
+        console.error('[Cart] clear error', e);
+        await this.fetch();
+      } finally {
+        this.clearing = false;
+        this._setLoading(false);
+      }
+    },
 
     formattedPrice(cents) {
       return new Intl.NumberFormat('en-IN', {
@@ -258,8 +398,13 @@ document.addEventListener('alpine:init', () => {
   const header = document.querySelector('.site-header');
   if (!header) return;
 
-  const barHeight = document.querySelector('.announcement-bar')?.offsetHeight || 0;
-  header.style.top = barHeight + 'px';
+  const setHeaderOffset = () => {
+    const barHeight = document.querySelector('.announcement-bar')?.offsetHeight || 0;
+    document.documentElement.style.setProperty('--announcement-height', barHeight + 'px');
+  };
+
+  setHeaderOffset();
+  window.addEventListener('resize', setHeaderOffset, { passive: true });
 
   /* On non-index pages force the solid state immediately */
   const isHomepage = document.body.classList.contains('template-index');
@@ -334,5 +479,3 @@ document.addEventListener('alpine:init', () => {
     gsap.fromTo(heroMedia, { scale: 1.06 }, { scale: 1, duration: 1.8, ease: 'power2.out' });
   }
 })();
-
-

@@ -9,14 +9,23 @@
 
   <div class="hero-media">
     {%- if section.settings.video != blank -%}
-      <video
-        src="{{ section.settings.video }}"
-        autoplay
-        muted
-        loop
-        playsinline
-        poster="{%- if section.settings.image != blank -%}{{ section.settings.image | image_url: width: 1800 }}{%- endif -%}"
-      ></video>
+      {%- if section.settings.video.type == 'youtube' -%}
+        <iframe
+          src="https://www.youtube.com/embed/{{ section.settings.video.id }}?autoplay=1&mute=1&controls=0&loop=1&playlist={{ section.settings.video.id }}&playsinline=1&modestbranding=1"
+          title="{{ section.settings.heading | default: shop.name | escape }}"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          tabindex="-1"
+          aria-hidden="true"
+        ></iframe>
+      {%- elsif section.settings.video.type == 'vimeo' -%}
+        <iframe
+          src="https://player.vimeo.com/video/{{ section.settings.video.id }}?autoplay=1&muted=1&loop=1&background=1"
+          title="{{ section.settings.heading | default: shop.name | escape }}"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          tabindex="-1"
+          aria-hidden="true"
+        ></iframe>
+      {%- endif -%}
     {%- elsif section.settings.image != blank -%}
       <img
         src="{{ section.settings.image | image_url: width: 1800 }}"

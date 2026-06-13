@@ -1,12 +1,5 @@
 {
   "sections": {
-    "announcement-bar": {
-      "type": "announcement-bar",
-      "settings": {
-        "show_bar": true,
-        "text": "Free shipping on orders over ₹999 · COD available"
-      }
-    },
     "hero": {
       "type": "hero",
       "settings": {
@@ -37,5 +30,5 @@
       }
     }
   },
-  "order": ["announcement-bar", "hero", "marquee", "featured-collection"]
+  "order": ["hero", "marquee", "featured-collection"]
 }

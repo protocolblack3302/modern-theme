@@ -32,13 +32,13 @@
   <!-- Breadcrumb -->
   <div class="container">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/" class="breadcrumb__link">Home</a>
+      <a href="{{ routes.root_url }}" class="breadcrumb__link">Home</a>
       <span class="breadcrumb__sep" aria-hidden="true">→</span>
       {%- if collection -%}
         <a href="{{ collection.url }}" class="breadcrumb__link">{{ collection.title }}</a>
         <span class="breadcrumb__sep" aria-hidden="true">→</span>
       {%- else -%}
-        <a href="/collections/all" class="breadcrumb__link">Shop</a>
+        <a href="{{ routes.all_products_collection_url }}" class="breadcrumb__link">Shop</a>
         <span class="breadcrumb__sep" aria-hidden="true">→</span>
       {%- endif -%}
       <span class="breadcrumb__current" aria-current="page">{{ product.title }}</span>
