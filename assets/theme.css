@@ -153,6 +153,7 @@
   color: var(--color-text);
   transition: color var(--dur-fast);
   position: relative;
+  white-space: nowrap;
 }
 
 .header-nav a::after {
@@ -1402,16 +1403,16 @@
   }
 }
 
+/* Tablet and below: switch to hamburger menu */
+@media (max-width: 960px) {
+  .header-nav { display: none; }
+  .header-hamburger { display: flex; }
+  .header-logo { justify-content: center; }
+}
+
 @media (max-width: 768px) {
   .header-inner {
     grid-template-columns: auto 1fr auto;
-  }
-
-  .header-nav { display: none; }
-  .header-hamburger { display: flex; }
-
-  .header-logo {
-    justify-content: center;
   }
 
   .hero-actions { flex-direction: column; }
@@ -2606,6 +2607,13 @@ a.pagination__page:hover {
   /* Hero: less aggressive min-height on phones */
   .hero {
     min-height: 420px;
+  }
+
+  /* Inner page headings: smaller on mobile */
+  .page-content h1,
+  .policy-section h1,
+  .collection-header__title {
+    font-size: clamp(1.75rem, 7vw, 2.2rem);
   }
 
   /* Inner pages: tight top padding on mobile — header-height + 1rem breathing room */
