@@ -1,37 +1,35 @@
-/* Modern Theme — Alpine stores + GSAP animations + cart API + Lenis */
+/* Modern Theme — Alpine stores, GSAP, Lenis, cart API */
 
-/* ─── Lenis smooth scroll ─────────────────────────────── */
+/* ─── Lenis smooth scroll (guarded — must NEVER block Alpine init) ───
+   If the Lenis CDN fails to load, `new Lenis()` would throw and abort the
+   whole file, so the alpine:init listeners below would never register and
+   ALL Alpine features (cart, product page) would silently die. Guard it. */
 
-const lenis = new Lenis({
-  lerp: 0.08,
-  wheelMultiplier: 1,
-  smoothTouch: false,
-});
+let lenis = null;
 
-function raf(time) {
-  lenis.raf(time);
-  requestAnimationFrame(raf);
-}
-requestAnimationFrame(raf);
+try {
+  if (typeof Lenis !== 'undefined') {
+    lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 1, smoothTouch: false });
+    const raf = (time) => { lenis.raf(time); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
 
-// Sync Lenis with GSAP ScrollTrigger
-if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-
-  lenis.on('scroll', ScrollTrigger.update);
-
-  gsap.ticker.add((time) => {
-    lenis.raf(time * 1000);
-  });
-  gsap.ticker.lagSmoothing(0);
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+      gsap.ticker.lagSmoothing(0);
+    }
+  }
+} catch (e) {
+  console.warn('[Theme] Lenis init failed (smooth scroll disabled)', e);
 }
 
 
-/* ─── Alpine.js stores ────────────────────────────────── */
+/* ─── Alpine stores + data ────────────────────────────── */
 
 document.addEventListener('alpine:init', () => {
 
-  /* Cart store — single source of truth */
+  /* ── Cart store ── */
   Alpine.store('cart', {
     open: false,
     items: [],
@@ -39,20 +37,16 @@ document.addEventListener('alpine:init', () => {
     totalPrice: 0,
     loading: false,
 
-    async init() {
-      await this.fetch();
-    },
+    async init() { await this.fetch(); },
 
     async fetch() {
       try {
-        const res = await fetch('/cart.js', { headers: { 'Content-Type': 'application/json' } });
+        const res = await fetch('/cart.js');
         const cart = await res.json();
         this.items = cart.items;
         this.totalQuantity = cart.item_count;
         this.totalPrice = cart.total_price;
-      } catch (e) {
-        console.error('[Cart] fetch failed', e);
-      }
+      } catch (e) { console.error('[Cart] fetch error', e); }
     },
 
     async addItem(variantId, quantity = 1, properties = {}) {
@@ -63,14 +57,11 @@ document.addEventListener('alpine:init', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: variantId, quantity, properties }),
         });
-        if (!res.ok) throw new Error('Add to cart failed');
+        if (!res.ok) throw new Error(await res.text());
         await this.fetch();
         this.open = true;
-      } catch (e) {
-        console.error('[Cart] addItem failed', e);
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { console.error('[Cart] addItem error', e); }
+      finally { this.loading = false; }
     },
 
     async updateItem(key, quantity) {
@@ -81,43 +72,42 @@ document.addEventListener('alpine:init', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: key, quantity }),
         });
-        if (!res.ok) throw new Error('Cart change failed');
+        if (!res.ok) throw new Error(await res.text());
         await this.fetch();
-      } catch (e) {
-        console.error('[Cart] updateItem failed', e);
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { console.error('[Cart] updateItem error', e); }
+      finally { this.loading = false; }
     },
 
-    async removeItem(key) {
-      await this.updateItem(key, 0);
-    },
+    async removeItem(key) { await this.updateItem(key, 0); },
 
     formattedPrice(cents) {
       return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        minimumFractionDigits: 0,
+        style: 'currency', currency: 'INR', minimumFractionDigits: 0,
       }).format(cents / 100);
     },
 
-    get formattedTotal() {
-      return this.formattedPrice(this.totalPrice);
-    },
+    get formattedTotal() { return this.formattedPrice(this.totalPrice); },
   });
 
-  /* Mobile menu store */
+
+  /* ── Mobile menu store ── */
   Alpine.store('menu', {
     open: false,
-    toggle() { this.open = !this.open; },
-    close() { this.open = false; },
+    toggle() { this.open = !this.open; document.body.style.overflow = this.open ? 'hidden' : ''; },
+    close() { this.open = false; document.body.style.overflow = ''; },
   });
 
-  /* Product page store */
-  Alpine.data('productPage', (productData) => ({
-    product: productData,
-    selectedVariantId: productData.selected_or_first_available_variant?.id,
+
+  /* ── Product page data ──
+     Takes ONLY the product id. All JSON parsing happens inside init() with
+     try/catch so a malformed payload can never throw in the x-data attribute
+     (which would kill the whole component and hide the add-to-cart button). */
+  Alpine.data('productPage', (productId) => ({
+    product: null,
+    images: [],
+    inventory: {},
+    ready: false,
+    selectedVariantId: null,
     selectedOptions: {},
     activeImageIndex: 0,
     quantity: 1,
@@ -125,31 +115,128 @@ document.addEventListener('alpine:init', () => {
     addedToCart: false,
 
     init() {
-      const variant = this.product.selected_or_first_available_variant;
+      /* Parse product JSON — critical. If this fails, log and bail gracefully. */
+      try {
+        const el = document.getElementById('ProductJSON-' + productId);
+        this.product = JSON.parse(el.textContent);
+      } catch (e) {
+        console.error('[Product] failed to parse product JSON', e);
+        return;
+      }
+
+      /* Parse images JSON — optional. Failure only disables image swapping. */
+      try {
+        const imgEl = document.getElementById('ProductImagesJSON-' + productId);
+        if (imgEl) this.images = JSON.parse(imgEl.textContent);
+      } catch (e) {
+        console.warn('[Product] failed to parse images JSON', e);
+        this.images = [];
+      }
+
+      /* Parse inventory JSON — optional. */
+      try {
+        const invEl = document.getElementById('ProductInventoryJSON-' + productId);
+        if (invEl) this.inventory = JSON.parse(invEl.textContent);
+      } catch (e) {
+        this.inventory = {};
+      }
+
+      const variant =
+        this.product.selected_or_first_available_variant ||
+        this.product.variants.find((v) => v.available) ||
+        this.product.variants[0];
+
       if (variant) {
+        this.selectedVariantId = variant.id;
         this.product.options.forEach((opt, i) => {
-          this.selectedOptions[opt] = variant.options[i];
+          const name = typeof opt === 'object' ? opt.name : opt;
+          this.selectedOptions[name] = variant.options[i];
         });
       }
+
+      this.ready = true;
+    },
+
+    _optName(opt) {
+      return typeof opt === 'object' ? opt.name : opt;
     },
 
     get currentVariant() {
+      if (!this.product) return null;
       return this.product.variants.find((v) =>
-        v.options.every((o, i) => o === this.selectedOptions[this.product.options[i]])
+        v.options.every(
+          (o, i) => o === this.selectedOptions[this._optName(this.product.options[i])]
+        )
       );
+    },
+
+    get stockInfo() {
+      const v = this.currentVariant;
+      if (!v) return null;
+      return this.inventory[v.id] || null;
+    },
+
+    /* CSS class for the stock dot: in / low / out */
+    get stockState() {
+      const v = this.currentVariant;
+      if (!v || !v.available) return 'product-stock__dot--out';
+      const info = this.stockInfo;
+      if (info && info.tracked && info.qty > 0 && info.qty <= 10) return 'product-stock__dot--low';
+      return 'product-stock__dot--in';
+    },
+
+    get stockLabel() {
+      const v = this.currentVariant;
+      if (!v || !v.available) return 'Out of stock';
+      const info = this.stockInfo;
+      if (info && info.tracked && info.qty > 0) {
+        if (info.qty <= 10) return 'Only ' + info.qty + ' left in stock';
+        return info.qty + ' in stock';
+      }
+      return 'In stock';
     },
 
     selectOption(name, value) {
       this.selectedOptions[name] = value;
-      const variant = this.currentVariant;
-      if (variant) this.selectedVariantId = variant.id;
+      const v = this.currentVariant;
+      if (v) {
+        this.selectedVariantId = v.id;
+        /* Swap to variant's featured image if it has one */
+        if (v.featured_image && this.product.images) {
+          const idx = this.product.images.findIndex((img) => img.id === v.featured_image.id);
+          if (idx >= 0) this.setActiveImage(idx);
+        }
+      }
     },
 
     isOptionAvailable(name, value) {
-      const testOptions = { ...this.selectedOptions, [name]: value };
+      if (!this.product) return true;
+      const test = { ...this.selectedOptions, [name]: value };
       return this.product.variants.some(
-        (v) => v.available && v.options.every((o, i) => o === testOptions[this.product.options[i]])
+        (v) =>
+          v.available &&
+          v.options.every(
+            (o, i) => o === test[this._optName(this.product.options[i])]
+          )
       );
+    },
+
+    /* index-only: URLs come from pre-rendered imagesData to avoid JS-string quoting issues */
+    setActiveImage(index) {
+      this.activeImageIndex = index;
+      const img = this.$refs && this.$refs.mainImage;
+      const data = this.images[index];
+      if (img && data) {
+        img.src = data.src900;
+        img.alt = data.alt || '';
+      }
+    },
+
+    formatMoney(cents) {
+      if (cents == null) return '';
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency', currency: 'INR', minimumFractionDigits: 0,
+      }).format(cents / 100);
     },
 
     async addToCart() {
@@ -158,17 +245,14 @@ document.addEventListener('alpine:init', () => {
       await Alpine.store('cart').addItem(this.selectedVariantId, this.quantity);
       this.addingToCart = false;
       this.addedToCart = true;
-      setTimeout(() => { this.addedToCart = false; }, 2000);
-    },
-
-    setActiveImage(index) {
-      this.activeImageIndex = index;
+      setTimeout(() => { this.addedToCart = false; }, 2500);
     },
   }));
+
 });
 
 
-/* ─── Header scroll behavior ──────────────────────────── */
+/* ─── Header: transparent on homepage, solid everywhere else ─── */
 
 (function initHeader() {
   const header = document.querySelector('.site-header');
@@ -177,18 +261,20 @@ document.addEventListener('alpine:init', () => {
   const barHeight = document.querySelector('.announcement-bar')?.offsetHeight || 0;
   header.style.top = barHeight + 'px';
 
-  let ticking = false;
+  /* On non-index pages force the solid state immediately */
+  const isHomepage = document.body.classList.contains('template-index');
+
+  if (!isHomepage) {
+    header.setAttribute('data-scrolled', '');
+  }
+
   window.addEventListener('scroll', () => {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        if (window.scrollY > 60) {
-          header.setAttribute('data-scrolled', '');
-        } else {
-          header.removeAttribute('data-scrolled');
-        }
-        ticking = false;
-      });
-      ticking = true;
+    if (isHomepage) {
+      if (window.scrollY > 60) {
+        header.setAttribute('data-scrolled', '');
+      } else {
+        header.removeAttribute('data-scrolled');
+      }
     }
   }, { passive: true });
 })();
@@ -199,49 +285,31 @@ document.addEventListener('alpine:init', () => {
 (function initAnimations() {
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-  /* Fade-up reveal for generic elements */
   gsap.utils.toArray('[data-animate="fade-up"]').forEach((el) => {
     gsap.fromTo(el,
       { opacity: 0, y: 48 },
       {
-        opacity: 1,
-        y: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 88%',
-          once: true,
-        },
+        opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
       }
     );
   });
 
-  /* Stagger children */
   gsap.utils.toArray('[data-animate="stagger"]').forEach((parent) => {
     const children = parent.querySelectorAll(':scope > *');
     gsap.fromTo(children,
       { opacity: 0, y: 32 },
       {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        ease: 'power3.out',
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: parent,
-          start: 'top 85%',
-          once: true,
-        },
+        opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.1,
+        scrollTrigger: { trigger: parent, start: 'top 85%', once: true },
       }
     );
   });
 
-  /* Hero entrance — runs immediately on load */
-  const heroHeading = document.querySelector('.hero-heading');
-  if (heroHeading) {
-    const lines = heroHeading.querySelectorAll('.line');
-    gsap.fromTo(lines,
+  /* Hero entrance */
+  const heroLines = document.querySelectorAll('.hero-heading .line');
+  if (heroLines.length) {
+    gsap.fromTo(heroLines,
       { y: '110%', opacity: 0 },
       { y: '0%', opacity: 1, duration: 1, ease: 'power4.out', stagger: 0.12, delay: 0.1 }
     );
@@ -249,76 +317,22 @@ document.addEventListener('alpine:init', () => {
 
   const heroEyebrow = document.querySelector('.hero-eyebrow');
   if (heroEyebrow) {
-    gsap.fromTo(heroEyebrow,
-      { opacity: 0, y: 16 },
-      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.05 }
-    );
+    gsap.fromTo(heroEyebrow, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.05 });
   }
 
   const heroSub = document.querySelector('.hero-subheading');
   if (heroSub) {
-    gsap.fromTo(heroSub,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 }
-    );
+    gsap.fromTo(heroSub, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 });
   }
 
-  const heroCtas = document.querySelectorAll('.hero-actions .btn');
-  if (heroCtas.length) {
-    gsap.fromTo(heroCtas,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.1, delay: 0.55 }
-    );
-  }
-
-  /* Hero image subtle scale */
-  const heroMedia = document.querySelector('.hero-media img, .hero-media video');
-  if (heroMedia) {
-    gsap.fromTo(heroMedia,
-      { scale: 1.06 },
-      { scale: 1, duration: 1.8, ease: 'power2.out' }
-    );
-  }
-})();
-
-
-/* ─── Cart drawer — Alpine x-show bridge ─────────────── */
-
-(function initCartDrawerBridge() {
-  const drawer = document.querySelector('.cart-drawer');
-  if (!drawer) return;
-
-  const observer = new MutationObserver(() => {
-    /* Alpine sets display:none via x-show — we bridge to data-open for CSS transition */
-    if (drawer.style.display === 'none' || drawer.style.display === '') {
-      drawer.removeAttribute('data-open');
-    } else {
-      drawer.setAttribute('data-open', '');
-    }
+  gsap.utils.toArray('.hero-actions .btn').forEach((btn, i) => {
+    gsap.fromTo(btn, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.55 + i * 0.1 });
   });
 
-  observer.observe(drawer, { attributes: true, attributeFilter: ['style'] });
+  const heroMedia = document.querySelector('.hero-media img, .hero-media video');
+  if (heroMedia) {
+    gsap.fromTo(heroMedia, { scale: 1.06 }, { scale: 1, duration: 1.8, ease: 'power2.out' });
+  }
 })();
 
 
-/* ─── Product gallery thumbnails ──────────────────────── */
-
-document.addEventListener('click', (e) => {
-  const thumb = e.target.closest('.product-gallery__thumb');
-  if (!thumb) return;
-
-  const gallery = thumb.closest('.product-gallery');
-  if (!gallery) return;
-
-  const index = parseInt(thumb.dataset.index, 10);
-  const mainImg = gallery.querySelector('.product-gallery__main img');
-  const allThumbs = gallery.querySelectorAll('.product-gallery__thumb');
-
-  if (mainImg) {
-    mainImg.src = thumb.dataset.src;
-    mainImg.srcset = thumb.dataset.srcset || '';
-  }
-
-  allThumbs.forEach((t) => t.classList.remove('active'));
-  thumb.classList.add('active');
-});

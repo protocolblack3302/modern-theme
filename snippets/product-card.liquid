@@ -35,14 +35,7 @@
           loading="{{ loading }}"
         >
       {%- else -%}
-        <img
-          class="product-card__img product-card__img--primary"
-          src="{{ 'product-1' | placeholder_svg_tag }}"
-          alt="{{ product.title | escape }}"
-          width="600"
-          height="800"
-          loading="{{ loading }}"
-        >
+        <div class="product-card__img-placeholder" aria-hidden="true"></div>
       {%- endif -%}
 
       {%- if secondary_image -%}

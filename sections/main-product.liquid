@@ -1,20 +1,61 @@
 {%- liquid
-  assign product = product
   assign current_variant = product.selected_or_first_available_variant
+  assign featured_image = current_variant.featured_image | default: product.featured_image
 -%}
 
-<section class="product-page" x-data="productPage({{ product | json | escape }})" x-cloak>
+<!-- Product data: Alpine reads from script tags to avoid HTML-entity escaping issues -->
+<script id="ProductJSON-{{ product.id }}" type="application/json">
+  {{ product | json }}
+</script>
+
+<script id="ProductImagesJSON-{{ product.id }}" type="application/json">
+  [
+    {%- for image in product.images -%}
+      {"src900": {{ image | image_url: width: 900 | json }}, "src144": {{ image | image_url: width: 144 | json }}, "alt": {{ image.alt | default: product.title | json }}}{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+</script>
+
+<!-- Inventory map: per-variant stock + whether inventory is tracked -->
+<script id="ProductInventoryJSON-{{ product.id }}" type="application/json">
+  {
+    {%- for v in product.variants -%}
+      "{{ v.id }}": {"qty": {{ v.inventory_quantity | default: 0 }}, "tracked": {% if v.inventory_management != blank %}true{% else %}false{% endif %}, "available": {{ v.available }}}{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  }
+</script>
+
+<section
+  class="product-page"
+  x-data="productPage('{{ product.id }}')"
+>
+  <!-- Breadcrumb -->
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/" class="breadcrumb__link">Home</a>
+      <span class="breadcrumb__sep" aria-hidden="true">→</span>
+      {%- if collection -%}
+        <a href="{{ collection.url }}" class="breadcrumb__link">{{ collection.title }}</a>
+        <span class="breadcrumb__sep" aria-hidden="true">→</span>
+      {%- else -%}
+        <a href="/collections/all" class="breadcrumb__link">Shop</a>
+        <span class="breadcrumb__sep" aria-hidden="true">→</span>
+      {%- endif -%}
+      <span class="breadcrumb__current" aria-current="page">{{ product.title }}</span>
+    </nav>
+  </div>
+
   <div class="container">
     <div class="product-layout">
 
-      <!-- Gallery -->
+      <!-- ── Gallery ── -->
       <div class="product-gallery">
+
         <div class="product-gallery__main">
           <img
-            :src="product.images[activeImageIndex]?.src || '{{ current_variant.featured_image | image_url: width: 900 }}'"
-            :alt="product.images[activeImageIndex]?.alt || '{{ product.title | escape }}'"
-            src="{{ current_variant.featured_image | default: product.featured_image | image_url: width: 900 }}"
-            alt="{{ product.title | escape }}"
+            x-ref="mainImage"
+            src="{{ featured_image | image_url: width: 900 }}"
+            alt="{{ featured_image.alt | escape | default: product.title | escape }}"
             width="900"
             height="1200"
             loading="eager"
@@ -26,17 +67,14 @@
           <div class="product-gallery__thumbs">
             {%- for image in product.images -%}
               <button
-                class="product-gallery__thumb {% if forloop.first %}active{% endif %}"
-                data-index="{{ forloop.index0 }}"
-                data-src="{{ image | image_url: width: 900 }}"
-                data-srcset="{{ image | image_url: width: 600 }} 600w, {{ image | image_url: width: 900 }} 900w"
-                @click="setActiveImage({{ forloop.index0 }})"
+                class="product-gallery__thumb{% if forloop.first %} active{% endif %}"
                 :class="{ active: activeImageIndex === {{ forloop.index0 }} }"
+                @click="setActiveImage({{ forloop.index0 }})"
                 aria-label="View image {{ forloop.index }}"
               >
                 <img
                   src="{{ image | image_url: width: 144 }}"
-                  alt="{{ image.alt | escape | default: product.title }}"
+                  alt="{{ image.alt | escape | default: product.title | escape }}"
                   width="72"
                   height="96"
                   loading="lazy"
@@ -45,45 +83,51 @@
             {%- endfor -%}
           </div>
         {%- endif -%}
+
       </div>
 
-      <!-- Details -->
+      <!-- ── Details ── -->
       <div class="product-details" data-animate="fade-up">
+
         <p class="product-details__brand">{{ product.vendor }}</p>
         <h1 class="product-details__title">{{ product.title }}</h1>
 
         <!-- Price -->
         <div class="product-details__price">
-          <template x-if="currentVariant">
+          <template x-if="currentVariant && currentVariant.compare_at_price > currentVariant.price">
             <span>
-              <span :class="currentVariant.compare_at_price > currentVariant.price ? 'product-details__price--sale' : ''"
-                x-text="new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(currentVariant.price / 100)">
-              </span>
-              <span
-                class="product-details__price--compare"
-                x-show="currentVariant.compare_at_price > currentVariant.price"
-                x-text="new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(currentVariant.compare_at_price / 100)"
-              ></span>
+              <span class="product-details__price--sale" x-text="formatMoney(currentVariant.price)"></span>
+              <span class="product-details__price--compare" x-text="formatMoney(currentVariant.compare_at_price)"></span>
             </span>
+          </template>
+          <template x-if="!currentVariant || currentVariant.compare_at_price <= currentVariant.price">
+            <span x-text="currentVariant ? formatMoney(currentVariant.price) : '{{ product.price | money }}'"></span>
           </template>
         </div>
 
-        <!-- Options -->
+        <!-- Stock status -->
+        <div class="product-stock" x-show="ready">
+          <span class="product-stock__dot" :class="stockState"></span>
+          <span x-text="stockLabel"></span>
+        </div>
+
+        <!-- Variant options -->
         {%- unless product.has_only_default_variant -%}
           {%- for option in product.options_with_values -%}
             <div class="option-group">
               <p class="option-group__label">
-                {{ option.name }}: <span x-text="selectedOptions['{{ option.name }}']"></span>
+                {{ option.name }}:
+                <span x-text="selectedOptions['{{ option.name | escape }}']"></span>
               </p>
               <div class="option-pills">
                 {%- for value in option.values -%}
                   <button
                     class="option-pill"
                     :class="{
-                      active: selectedOptions['{{ option.name }}'] === '{{ value | escape }}',
-                      unavailable: !isOptionAvailable('{{ option.name }}', '{{ value | escape }}')
+                      active: selectedOptions['{{ option.name | escape }}'] === '{{ value | escape }}',
+                      unavailable: !isOptionAvailable('{{ option.name | escape }}', '{{ value | escape }}')
                     }"
-                    @click="selectOption('{{ option.name }}', '{{ value | escape }}')"
+                    @click="selectOption('{{ option.name | escape }}', '{{ value | escape }}')"
                   >
                     {{ value }}
                   </button>
@@ -97,13 +141,13 @@
         <div class="option-group">
           <p class="option-group__label">Quantity</p>
           <div class="qty-control" style="display: inline-flex; padding: 0.5rem 0.75rem;">
-            <button class="qty-btn" @click="quantity = Math.max(1, quantity - 1)">−</button>
+            <button class="qty-btn" @click="quantity = Math.max(1, quantity - 1)" aria-label="Decrease">−</button>
             <span class="qty-value" x-text="quantity"></span>
-            <button class="qty-btn" @click="quantity++">+</button>
+            <button class="qty-btn" @click="quantity++" aria-label="Increase">+</button>
           </div>
         </div>
 
-        <!-- ATC -->
+        <!-- Add to cart -->
         <div class="product-details__atc">
           <template x-if="currentVariant && currentVariant.available">
             <button
@@ -111,21 +155,21 @@
               @click="addToCart()"
               :disabled="addingToCart"
             >
-              <span x-show="!addingToCart && !addedToCart">{{ 'cart.add_to_cart' | t }}</span>
-              <span x-show="addingToCart">{{ 'general.loading' | t }}</span>
-              <span x-show="addedToCart">Added!</span>
+              <span x-show="!addingToCart && !addedToCart">Add to Cart</span>
+              <span x-show="addingToCart" style="display:none">Adding...</span>
+              <span x-show="addedToCart" style="display:none">Added ✓</span>
             </button>
           </template>
           <template x-if="!currentVariant || !currentVariant.available">
-            <button class="btn btn--ghost btn--full btn--sold-out" disabled>
-              {{ 'cart.sold_out' | t }}
+            <button class="btn btn--ghost btn--full" disabled style="opacity:0.45; cursor:not-allowed;">
+              Sold Out
             </button>
           </template>
         </div>
 
         <!-- Description -->
         {%- if product.description != blank -%}
-          <div class="product-details__desc">
+          <div class="product-details__desc rte">
             {{ product.description }}
           </div>
         {%- endif -%}
@@ -140,10 +184,6 @@
   "name": "Main product",
   "tag": "section",
   "settings": [],
-  "presets": [
-    {
-      "name": "Main product"
-    }
-  ]
+  "presets": [{ "name": "Main product" }]
 }
 {% endschema %}

@@ -7,6 +7,11 @@
         <a href="{{ link.url }}" {% if link.active %}aria-current="page"{% endif %}>
           {{ link.title }}
         </a>
+      {%- else -%}
+        <a href="/">Home</a>
+        <a href="/collections/all">Shop</a>
+        <a href="/pages/about">About</a>
+        <a href="/pages/contact">Contact</a>
       {%- endfor -%}
     </nav>
 
@@ -35,16 +40,14 @@
         {%- render 'icon-search' -%}
       </a>
 
-      <!-- Account -->
-      {%- if shop.customer_accounts_enabled -%}
-        <a
-          href="{%- if customer -%}/account{%- else -%}/account/login{%- endif -%}"
-          class="header-icon-btn"
-          aria-label="{{ 'account.my_account' | t }}"
-        >
-          {%- render 'icon-account' -%}
-        </a>
-      {%- endif -%}
+      <!-- Account — always visible so there's always a sign-in entry point -->
+      <a
+        href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+        class="header-icon-btn"
+        aria-label="{{ 'account.my_account' | t }}"
+      >
+        {%- render 'icon-account' -%}
+      </a>
 
       <!-- Cart -->
       <button
@@ -79,12 +82,6 @@
 <div
   class="mobile-menu"
   x-show="$store.menu.open"
-  x-transition:enter="transition"
-  x-transition:enter-start="opacity-0"
-  x-transition:enter-end="opacity-100"
-  x-transition:leave="transition"
-  x-transition:leave-start="opacity-100"
-  x-transition:leave-end="opacity-0"
   @keydown.escape.window="$store.menu.close()"
   role="dialog"
   aria-label="Mobile navigation"
@@ -108,10 +105,32 @@
   <nav class="mobile-nav" aria-label="Mobile navigation">
     {%- for link in section.settings.menu.links -%}
       <a href="{{ link.url }}" @click="$store.menu.close()">{{ link.title }}</a>
+    {%- else -%}
+      <a href="/" @click="$store.menu.close()">Home</a>
+      <a href="/collections/all" @click="$store.menu.close()">Shop</a>
+      <a href="/pages/about" @click="$store.menu.close()">About</a>
+      <a href="/pages/contact" @click="$store.menu.close()">Contact</a>
     {%- endfor -%}
   </nav>
 
   <div class="mobile-menu-footer">
+    <!-- Account link in mobile menu — always visible -->
+    {%- if customer -%}
+      <a href="{{ routes.account_url }}" @click="$store.menu.close()" class="mobile-menu-account">
+        My Account
+      </a>
+      <a href="{{ routes.account_logout_url }}" class="mobile-menu-account">
+        Log Out
+      </a>
+    {%- else -%}
+      <a href="{{ routes.account_login_url }}" @click="$store.menu.close()" class="mobile-menu-account">
+        Sign In
+      </a>
+      <a href="{{ routes.account_register_url }}" @click="$store.menu.close()" class="mobile-menu-account">
+        Register
+      </a>
+    {%- endif -%}
+
     {%- if settings.social_instagram != blank -%}
       <a href="{{ settings.social_instagram }}" aria-label="Instagram" target="_blank" rel="noopener">Instagram</a>
     {%- endif -%}

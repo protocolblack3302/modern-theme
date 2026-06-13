@@ -145,6 +145,9 @@ svg { display: block; }
   padding-block: var(--section-gap);
 }
 
+/* Alpine x-cloak: prevent flash of un-initialized components */
+[x-cloak] { display: none !important; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--color-bg); }

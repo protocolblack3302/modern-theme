@@ -32,15 +32,20 @@
   {{ 'base.css' | asset_url | stylesheet_tag }}
   {{ 'theme.css' | asset_url | stylesheet_tag }}
 
-  <!-- Alpine.js -->
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-  <!-- GSAP + ScrollTrigger -->
+  <!-- GSAP + ScrollTrigger (load before theme.js so animations are available) -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
   <!-- Lenis smooth scroll -->
   <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+
+  <!-- theme.js MUST load before Alpine so its alpine:init listeners
+       (Alpine.store('cart') + Alpine.data('productPage')) are registered
+       before Alpine starts. -->
+  <script src="{{ 'theme.js' | asset_url }}" defer></script>
+
+  <!-- Alpine.js — loaded LAST so all alpine:init listeners exist first -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   <!-- CSS custom properties from settings -->
   <style>
@@ -64,8 +69,8 @@
   class="template-{{ template.name }}{% if template.suffix %}-{{ template.suffix }}{% endif %}"
 >
 
-  {%- sections 'announcement-bar' -%}
-  {%- sections 'header' -%}
+  {%- section 'announcement-bar' -%}
+  {%- section 'header' -%}
 
   <!-- Cart Drawer -->
   {%- render 'cart-drawer' -%}
@@ -73,25 +78,15 @@
   <!-- Cart / drawer overlay -->
   <div
     class="overlay"
-    x-show="$store.cart.open"
-    x-transition:enter="overlay-enter"
-    x-transition:enter-start="overlay-enter-start"
-    x-transition:enter-end="overlay-enter-end"
-    x-transition:leave="overlay-enter"
-    x-transition:leave-start="overlay-enter-end"
-    x-transition:leave-end="overlay-enter-start"
+    :class="{ 'overlay--visible': $store.cart.open }"
     @click="$store.cart.open = false"
-    style="display:none"
   ></div>
 
   <main id="main-content" tabindex="-1">
     {{ content_for_layout }}
   </main>
 
-  {%- sections 'footer' -%}
-
-  <!-- Theme JS (after DOM) -->
-  <script src="{{ 'theme.js' | asset_url }}" defer></script>
+  {%- section 'footer' -%}
 
 </body>
 </html>
