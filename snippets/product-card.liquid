@@ -62,8 +62,6 @@
       {%- else -%}
         {%- if on_sale -%}
           <span class="product-card__badge product-card__badge--sale">{{ 'products.sale' | t }}</span>
-        {%- elsif product.created_at > 'now' | date: '%s' | minus: 2592000 | date: '%Y-%m-%d %H:%M' -%}
-          <span class="product-card__badge product-card__badge--new">{{ 'products.new' | t }}</span>
         {%- endif -%}
       {%- endunless -%}
 
