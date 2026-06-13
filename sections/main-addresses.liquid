@@ -1,0 +1,114 @@
+{%- if customer -%}
+<div class="section account-page" style="padding-top: calc(72px + 3rem);">
+  <div class="container">
+
+    <div class="account-page-header" data-animate="fade-up">
+      <div>
+        <a href="{{ routes.account_url }}" class="article-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          My Account
+        </a>
+        <h1 class="account-title">Addresses</h1>
+      </div>
+    </div>
+
+    <!-- Add new address -->
+    <div class="account-card" style="margin-bottom: 3rem;" data-animate="fade-up">
+      <h2 class="account-card__title">Add New Address</h2>
+      {%- form 'customer_address', customer.new_address -%}
+        {%- if form.errors -%}
+          <div class="form-errors">
+            {%- for field in form.errors -%}
+              <p>{{ form.errors.messages[field] }}</p>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" name="address[first_name]" value="{{ form.first_name }}" class="form-input" autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="address[last_name]" value="{{ form.last_name }}" class="form-input" autocomplete="family-name">
+          </div>
+          <div class="form-group form-group--full">
+            <label class="form-label">Address Line 1</label>
+            <input type="text" name="address[address1]" value="{{ form.address1 }}" class="form-input" autocomplete="address-line1">
+          </div>
+          <div class="form-group form-group--full">
+            <label class="form-label">Address Line 2 (optional)</label>
+            <input type="text" name="address[address2]" value="{{ form.address2 }}" class="form-input" autocomplete="address-line2">
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input type="text" name="address[city]" value="{{ form.city }}" class="form-input" autocomplete="address-level2">
+          </div>
+          <div class="form-group">
+            <label class="form-label">State / Province</label>
+            <input type="text" name="address[province]" value="{{ form.province }}" class="form-input" autocomplete="address-level1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Country</label>
+            <input type="text" name="address[country]" value="{{ form.country }}" class="form-input" autocomplete="country-name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Postal / ZIP Code</label>
+            <input type="text" name="address[zip]" value="{{ form.zip }}" class="form-input" autocomplete="postal-code">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone (optional)</label>
+            <input type="tel" name="address[phone]" value="{{ form.phone }}" class="form-input" autocomplete="tel">
+          </div>
+          <div class="form-group" style="align-self: center;">
+            <label class="form-check">
+              <input type="checkbox" name="address[default]" value="1">
+              <span>Set as default address</span>
+            </label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn--primary">Add Address</button>
+      {%- endform -%}
+    </div>
+
+    <!-- Saved addresses -->
+    {%- if customer.addresses.size > 0 -%}
+      <h2 class="account-section-title" data-animate="fade-up">Saved Addresses</h2>
+      <div class="addresses-grid" data-animate="stagger">
+        {%- for address in customer.addresses -%}
+          <div class="address-card{% if address == customer.default_address %} address-card--default{% endif %}">
+            {%- if address == customer.default_address -%}
+              <span class="address-card__badge">Default</span>
+            {%- endif -%}
+            <address style="font-style: normal; line-height: 1.75; color: var(--color-text-muted); font-size: var(--size-sm); margin-bottom: 1.25rem;">
+              <strong style="color: var(--color-text);">{{ address.name }}</strong><br>
+              {{ address.address1 }}<br>
+              {%- if address.address2 != blank -%}{{ address.address2 }}<br>{%- endif -%}
+              {{ address.city }}, {{ address.province_code }} {{ address.zip }}<br>
+              {{ address.country }}
+              {%- if address.phone != blank -%}<br>{{ address.phone }}{%- endif -%}
+            </address>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+              <a href="{{ routes.account_addresses_url }}/{{ address.id }}" class="btn btn--ghost btn--sm">Edit</a>
+              {%- form 'customer_address', address -%}
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit" class="btn btn--ghost btn--sm" style="color: var(--color-accent);" onclick="return confirm('Delete this address?')">Delete</button>
+              {%- endform -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Addresses",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Addresses" }]
+}
+{% endschema %}

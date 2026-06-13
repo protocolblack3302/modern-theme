@@ -1,0 +1,68 @@
+<section class="section main-search" style="padding-top: calc(72px + 3rem);">
+  <div class="container">
+
+    <div class="search-hero" data-animate="fade-up">
+      <p class="section-eyebrow">Search</p>
+      <h1 class="section-title" style="margin-bottom: 2rem;">FIND YOUR FIT</h1>
+
+      <form action="{{ routes.search_url }}" method="get" role="search" class="search-form">
+        <input type="hidden" name="type" value="product">
+        <div class="search-form__inner">
+          <input
+            type="search"
+            name="q"
+            value="{{ search.terms | escape }}"
+            placeholder="Search products, styles..."
+            class="search-form__input"
+            autofocus
+            aria-label="Search"
+          >
+          <button type="submit" class="search-form__btn btn btn--primary" aria-label="Search">
+            {%- render 'icon-search' -%}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {%- if search.performed -%}
+      {%- if search.results_count > 0 -%}
+        <div class="search-results-meta" data-animate="fade-up">
+          <p class="collection-header__count">
+            {{ search.results_count }} result{% if search.results_count != 1 %}s{% endif %}
+            for &ldquo;<strong>{{ search.terms | escape }}</strong>&rdquo;
+          </p>
+        </div>
+
+        {%- paginate search.results by 12 -%}
+          <div class="product-grid" data-animate="stagger">
+            {%- for item in search.results -%}
+              {%- if item.object_type == 'product' -%}
+                {%- render 'product-card', product: item, lazy: forloop.first == false -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+          {%- if paginate.pages > 1 -%}
+            <div style="margin-top: 4rem;">{%- render 'pagination', paginate: paginate -%}</div>
+          {%- endif -%}
+        {%- endpaginate -%}
+
+      {%- else -%}
+        <div class="search-no-results" data-animate="fade-up">
+          <p class="search-no-results__msg">No results for &ldquo;<strong>{{ search.terms | escape }}</strong>&rdquo;</p>
+          <p style="color: var(--color-text-muted); margin-top: 0.5rem;">Try checking your spelling, or use more general terms.</p>
+          <a href="{{ routes.all_products_collection_url }}" class="btn btn--primary" style="margin-top: 2rem;">Browse All Products</a>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Search",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Search" }]
+}
+{% endschema %}

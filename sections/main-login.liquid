@@ -1,0 +1,67 @@
+<div class="section account-page" style="padding-top: calc(72px + 4rem);">
+  <div class="container">
+    <div class="account-form-wrap" data-animate="fade-up">
+      <h1 class="account-title">Log In</h1>
+
+      {%- form 'customer_login' -%}
+        {%- if form.errors -%}
+          <div class="form-errors">
+            {%- for field in form.errors -%}
+              <p>{{ form.errors.messages[field] }}</p>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        <div class="form-group">
+          <label for="login-email" class="form-label">Email</label>
+          <input type="email" id="login-email" name="customer[email]" autocomplete="email" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="login-password" class="form-label">Password</label>
+          <input type="password" id="login-password" name="customer[password]" autocomplete="current-password" required class="form-input">
+        </div>
+        <div class="form-group form-group--row">
+          <button type="submit" class="btn btn--primary">Log In</button>
+          <a href="{{ routes.root_url }}account/login#recover" class="form-forgot">Forgot password?</a>
+        </div>
+      {%- endform -%}
+
+      <p class="account-switch">Don't have an account? <a href="{{ routes.account_register_url }}">Create one</a></p>
+
+      <div id="recover" class="account-recover">
+        <h2 class="account-recover__title">Reset Your Password</h2>
+        <p style="color: var(--color-text-muted); font-size: var(--size-sm); margin-bottom: 1.5rem;">We'll send a link to your email.</p>
+        {%- form 'recover_customer_password' -%}
+          {%- if form.posted_successfully? -%}
+            <p class="form-success">Check your email for a reset link.</p>
+          {%- else -%}
+            <div class="form-group">
+              <label for="recover-email" class="form-label">Email address</label>
+              <input type="email" id="recover-email" name="email" autocomplete="email" required class="form-input">
+            </div>
+            <button type="submit" class="btn btn--primary">Send Reset Link</button>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    if (window.location.hash === '#recover') {
+      var recover = document.getElementById('recover');
+      if (recover) recover.classList.add('is-open');
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Login",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Login" }]
+}
+{% endschema %}

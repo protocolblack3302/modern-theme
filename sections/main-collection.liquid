@@ -1,36 +1,54 @@
-<div class="collection-header section">
+{%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+
+<div class="section" style="padding-top: calc(72px + 3rem); padding-bottom: 0;">
   <div class="container">
-    <h1 class="collection-header__title" data-animate="fade-up">{{ collection.title }}</h1>
-    {%- if collection.description != blank -%}
-      <p class="collection-header__desc" style="color: var(--color-text-muted); max-width: 60ch; margin-top: 0.75rem;" data-animate="fade-up">
-        {{ collection.description }}
-      </p>
-    {%- endif -%}
-    <p class="collection-header__count">{{ collection.products_count }} products</p>
+    <div class="collection-header" data-animate="fade-up">
+      <div>
+        <h1 class="collection-header__title">{{ collection.title }}</h1>
+        {%- if collection.description != blank -%}
+          <p class="collection-header__desc">{{ collection.description }}</p>
+        {%- endif -%}
+      </div>
+      <p class="collection-header__count">{{ collection.products_count }} products</p>
+    </div>
+
+    <div class="collection-toolbar" data-animate="fade-up">
+      <form method="get" action="{{ collection.url }}" class="collection-sort">
+        <label for="sort-by" class="collection-sort__label">Sort by</label>
+        <div class="collection-sort__select-wrap">
+          <select name="sort_by" id="sort-by" class="collection-sort__select" onchange="this.form.submit()">
+            {%- for option in collection.sort_options -%}
+              <option value="{{ option.value }}" {% if option.value == sort_by %}selected{% endif %}>
+                {{ option.name }}
+              </option>
+            {%- endfor -%}
+          </select>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
-<div class="collection-grid">
+<div class="section" style="padding-top: 2rem;">
   <div class="container">
-    <div class="product-grid" data-animate="stagger">
-      {%- for product in collection.products -%}
-        {%- render 'product-card', product: product, lazy: forloop.first == false -%}
-      {%- else -%}
-        <p style="color: var(--color-text-muted); grid-column: 1 / -1;">No products found in this collection.</p>
-      {%- endfor -%}
-    </div>
+    {%- paginate collection.products by 12 -%}
+      {%- if collection.products.size > 0 -%}
+        <div class="product-grid" data-animate="stagger">
+          {%- for product in collection.products -%}
+            {%- render 'product-card', product: product, lazy: forloop.first == false -%}
+          {%- endfor -%}
+        </div>
 
-    {%- if paginate.pages > 1 -%}
-      <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
-        {%- for i in (1..paginate.pages) -%}
-          <a
-            href="{{ paginate.current_page | replace: paginate.current_page, i }}"
-            class="btn {% if paginate.current_page == i %}btn--primary{% else %}btn--ghost{% endif %}"
-            style="min-width: 44px; padding: 0.6rem 0.8rem;"
-          >{{ i }}</a>
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
+        {%- if paginate.pages > 1 -%}
+          <div style="margin-top: 4rem;">
+            {%- render 'pagination', paginate: paginate -%}
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        <p class="collection-empty">No products found in this collection.</p>
+      {%- endif -%}
+    {%- endpaginate -%}
   </div>
 </div>
 

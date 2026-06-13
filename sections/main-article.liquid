@@ -1,0 +1,64 @@
+<article class="main-article" style="padding-top: calc(72px + 3rem); padding-bottom: var(--section-gap);" itemscope itemtype="https://schema.org/Article">
+  <div class="container">
+    <div class="article-layout" data-animate="fade-up">
+
+      <div class="article-header">
+        <a href="{{ blog.url }}" class="article-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          {{ blog.title }}
+        </a>
+        <h1 class="article-title" itemprop="headline">{{ article.title }}</h1>
+        <div class="article-meta-row">
+          {%- if article.author -%}
+            <span>By {{ article.author }}</span>
+          {%- endif -%}
+          <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}" itemprop="datePublished">
+            {{ article.published_at | date: '%B %d, %Y' }}
+          </time>
+        </div>
+      </div>
+
+      {%- if article.image -%}
+        <div class="article-featured-image" itemprop="image">
+          <img
+            src="{{ article.image | image_url: width: 1200 }}"
+            alt="{{ article.image.alt | escape | default: article.title }}"
+            width="1200"
+            height="675"
+            loading="eager"
+            fetchpriority="high"
+          >
+        </div>
+      {%- endif -%}
+
+      <div class="article-body rte" itemprop="articleBody">
+        {{ article.content }}
+      </div>
+
+      {%- if article.tags.size > 0 -%}
+        <div class="article-tags">
+          {%- for tag in article.tags -%}
+            <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="article-tag">{{ tag }}</a>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      <div class="article-nav">
+        <a href="{{ blog.url }}" class="btn btn--ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          Back to {{ blog.title }}
+        </a>
+      </div>
+
+    </div>
+  </div>
+</article>
+
+{% schema %}
+{
+  "name": "Article",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Article" }]
+}
+{% endschema %}

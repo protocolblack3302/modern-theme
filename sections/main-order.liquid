@@ -1,0 +1,79 @@
+{%- if order -%}
+<div class="section account-page" style="padding-top: calc(72px + 3rem);">
+  <div class="container">
+
+    <div class="order-page-header" data-animate="fade-up">
+      <a href="{{ routes.account_url }}" class="article-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        My Account
+      </a>
+      <h1 class="account-title">Order {{ order.name }}</h1>
+      <p style="color: var(--color-text-muted);">Placed {{ order.created_at | date: '%B %d, %Y' }}</p>
+    </div>
+
+    <div class="order-layout" data-animate="fade-up">
+
+      <div class="order-items">
+        <h2 class="account-section-title">Items</h2>
+        {%- for line_item in order.line_items -%}
+          <div class="cart-item">
+            {%- if line_item.image -%}
+              <img class="cart-item__img" src="{{ line_item.image | image_url: width: 160 }}" alt="{{ line_item.title | escape }}" width="80" height="107" loading="lazy">
+            {%- else -%}
+              <div class="cart-item__img" style="background: var(--color-border);"></div>
+            {%- endif -%}
+            <div class="cart-item__details">
+              <p class="cart-item__title">{{ line_item.product.title }}</p>
+              {%- unless line_item.variant.title == 'Default Title' -%}
+                <p class="cart-item__variant">{{ line_item.variant.title }}</p>
+              {%- endunless -%}
+              <p class="cart-item__price">{{ line_item.price | money }} × {{ line_item.quantity }}</p>
+              <p class="cart-item__price" style="margin-top: 0.25rem;">Line total: <strong>{{ line_item.final_line_price | money }}</strong></p>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+
+      <div class="order-summary-panel">
+        <div class="account-card">
+          <h2 class="account-card__title">Order Summary</h2>
+          <div class="order-line"><span>Subtotal</span><span>{{ order.subtotal_price | money }}</span></div>
+          {%- for discount in order.discounts -%}
+            <div class="order-line" style="color: var(--color-accent);"><span>{{ discount.code }}</span><span>-{{ discount.savings | money }}</span></div>
+          {%- endfor -%}
+          <div class="order-line"><span>Shipping</span><span>{{ order.shipping_price | money }}</span></div>
+          {%- if order.tax_price > 0 -%}
+            <div class="order-line"><span>Tax</span><span>{{ order.tax_price | money }}</span></div>
+          {%- endif -%}
+          <div class="order-line order-line--total">
+            <span><strong>Total</strong></span>
+            <span><strong>{{ order.total_price | money }}</strong></span>
+          </div>
+        </div>
+
+        <div class="account-card">
+          <h2 class="account-card__title">Shipping to</h2>
+          <address style="font-style: normal; color: var(--color-text-muted); font-size: var(--size-sm); line-height: 1.75;">
+            {{ order.shipping_address.name }}<br>
+            {{ order.shipping_address.address1 }}<br>
+            {%- if order.shipping_address.address2 != blank -%}{{ order.shipping_address.address2 }}<br>{%- endif -%}
+            {{ order.shipping_address.city }}, {{ order.shipping_address.province_code }} {{ order.shipping_address.zip }}<br>
+            {{ order.shipping_address.country }}
+            {%- if order.shipping_address.phone -%}<br>{{ order.shipping_address.phone }}{%- endif -%}
+          </address>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Order",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Order" }]
+}
+{% endschema %}

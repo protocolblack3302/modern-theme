@@ -1,0 +1,60 @@
+{%- liquid
+  assign related_limit = section.settings.products_to_show
+  assign related_collection = product.collections.first
+-%}
+
+{%- if related_collection and related_collection.products_count > 1 -%}
+<section class="section related-products">
+  <div class="container">
+    <div class="section-header" data-animate="fade-up">
+      <div>
+        <p class="section-eyebrow">{{ section.settings.eyebrow | default: 'You May Also Like' }}</p>
+        <h2 class="section-title">{{ section.settings.title | default: 'RELATED PRODUCTS' }}</h2>
+      </div>
+    </div>
+
+    <div class="product-grid" data-animate="stagger">
+      {%- for related in related_collection.products limit: related_limit -%}
+        {%- unless related.id == product.id -%}
+          {%- render 'product-card', product: related, lazy: true -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Related products",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "You May Also Like"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "RELATED PRODUCTS"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 2,
+      "max": 8,
+      "step": 2,
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Related products"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,83 @@
+{%- if customer -%}
+<div class="section account-page" style="padding-top: calc(72px + 3rem);">
+  <div class="container">
+
+    <div class="account-page-header" data-animate="fade-up">
+      <h1 class="account-title">My Account</h1>
+      <a href="{{ routes.account_logout_url }}" class="btn btn--ghost btn--sm">Log Out</a>
+    </div>
+
+    <div class="account-layout">
+
+      <!-- Sidebar -->
+      <aside class="account-sidebar" data-animate="fade-up">
+        <div class="account-card">
+          <p class="account-card__name">{{ customer.name }}</p>
+          <p class="account-card__email">{{ customer.email }}</p>
+          <div class="account-links">
+            <a href="{{ routes.account_url }}">Orders</a>
+            <a href="{{ routes.account_addresses_url }}">Addresses</a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Orders -->
+      <div class="account-main">
+        <h2 class="account-section-title" data-animate="fade-up">Order History</h2>
+
+        {%- if customer.orders.size > 0 -%}
+          <div class="orders-table-wrap" data-animate="fade-up">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Date</th>
+                  <th>Payment</th>
+                  <th>Fulfillment</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {%- for order in customer.orders -%}
+                  <tr>
+                    <td><strong>{{ order.name }}</strong></td>
+                    <td>{{ order.created_at | date: '%b %d, %Y' }}</td>
+                    <td>
+                      <span class="order-status order-status--{{ order.financial_status }}">
+                        {{ order.financial_status | capitalize }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="order-status order-status--{{ order.fulfillment_status }}">
+                        {{ order.fulfillment_status | default: 'Unfulfilled' | capitalize }}
+                      </span>
+                    </td>
+                    <td>{{ order.total_price | money }}</td>
+                    <td><a href="{{ order.customer_url }}" class="section-link">Details</a></td>
+                  </tr>
+                {%- endfor -%}
+              </tbody>
+            </table>
+          </div>
+        {%- else -%}
+          <div class="account-empty" data-animate="fade-up">
+            <p>You haven't placed any orders yet.</p>
+            <a href="{{ routes.all_products_collection_url }}" class="btn btn--primary" style="margin-top: 1.25rem;">Start Shopping</a>
+          </div>
+        {%- endif -%}
+      </div>
+
+    </div>
+  </div>
+</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Account",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Account" }]
+}
+{% endschema %}

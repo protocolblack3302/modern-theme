@@ -3,7 +3,15 @@
     "main-product": {
       "type": "main-product",
       "settings": {}
+    },
+    "related-products": {
+      "type": "related-products",
+      "settings": {
+        "eyebrow": "You May Also Like",
+        "title": "RELATED PRODUCTS",
+        "products_to_show": 4
+      }
     }
   },
-  "order": ["main-product"]
+  "order": ["main-product", "related-products"]
 }

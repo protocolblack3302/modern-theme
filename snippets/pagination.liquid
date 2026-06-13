@@ -1,0 +1,41 @@
+{%- if paginate.pages > 1 -%}
+<nav class="pagination" aria-label="Pagination" data-animate="fade-up">
+
+  {%- if paginate.previous -%}
+    <a href="{{ paginate.previous.url }}" class="btn btn--ghost pagination__nav" aria-label="Previous page">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Prev
+    </a>
+  {%- else -%}
+    <span class="btn btn--ghost pagination__nav pagination__nav--disabled" aria-disabled="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Prev
+    </span>
+  {%- endif -%}
+
+  <div class="pagination__pages">
+    {%- for part in paginate.parts -%}
+      {%- if part.is_link -%}
+        <a href="{{ part.url }}" class="pagination__page">{{ part.title }}</a>
+      {%- elsif part.title == paginate.current_page -%}
+        <span class="pagination__page pagination__page--active" aria-current="page">{{ part.title }}</span>
+      {%- else -%}
+        <span class="pagination__ellipsis">{{ part.title }}</span>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  {%- if paginate.next -%}
+    <a href="{{ paginate.next.url }}" class="btn btn--ghost pagination__nav" aria-label="Next page">
+      Next
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+  {%- else -%}
+    <span class="btn btn--ghost pagination__nav pagination__nav--disabled" aria-disabled="true">
+      Next
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </span>
+  {%- endif -%}
+
+</nav>
+{%- endif -%}

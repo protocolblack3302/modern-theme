@@ -1,0 +1,34 @@
+<section class="section main-blog" style="padding-top: calc(72px + 3rem);">
+  <div class="container">
+    <div class="section-header" data-animate="fade-up">
+      <div>
+        <p class="section-eyebrow">Journal</p>
+        <h1 class="section-title">{{ blog.title }}</h1>
+      </div>
+    </div>
+
+    {%- paginate blog.articles by 9 -%}
+      {%- if blog.articles.size > 0 -%}
+        <div class="blog-grid" data-animate="stagger">
+          {%- for article in blog.articles -%}
+            {%- render 'article-card', article: article -%}
+          {%- endfor -%}
+        </div>
+        {%- if paginate.pages > 1 -%}
+          <div style="margin-top: 4rem;">{%- render 'pagination', paginate: paginate -%}</div>
+        {%- endif -%}
+      {%- else -%}
+        <p style="color: var(--color-text-muted);">No articles yet. Check back soon.</p>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Blog",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Blog" }]
+}
+{% endschema %}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gift Card — {{ shop.name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  {{ 'base.css' | asset_url | stylesheet_tag }}
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
+</head>
+<body style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+
+  <div class="gift-card-page">
+
+    <div class="gift-card-visual">
+      <div class="gift-card-brand">{{ shop.name }}</div>
+      <p class="gift-card-label">Gift Card</p>
+      <div class="gift-card-amount">{{ gift_card.balance | money }}</div>
+      {%- if gift_card.balance != gift_card.initial_value -%}
+        <p style="font-size: var(--size-xs); color: var(--color-text-muted); margin-top: 0.25rem;">
+          Original value: {{ gift_card.initial_value | money }}
+        </p>
+      {%- endif -%}
+    </div>
+
+    <div class="gift-card-code-wrap">
+      <p style="font-size: var(--size-xs); letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.75rem;">Your Code</p>
+      <div class="gift-card-code">{{ gift_card.code | format_code }}</div>
+    </div>
+
+    {%- if gift_card.expires_on -%}
+      <p class="gift-card-expiry">Expires {{ gift_card.expires_on | date: '%B %d, %Y' }}</p>
+    {%- endif -%}
+
+    {%- unless gift_card.enabled -%}
+      <p style="color: var(--color-accent); font-size: var(--size-sm); margin-top: 0.5rem; text-align: center;">This gift card has been disabled.</p>
+    {%- endunless -%}
+
+    <div class="gift-card-actions">
+      <a href="{{ shop.url }}" class="btn btn--primary">Shop Now</a>
+      <button onclick="window.print()" class="btn btn--ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Print
+      </button>
+    </div>
+
+  </div>
+
+</body>
+</html>

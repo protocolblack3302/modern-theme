@@ -1,0 +1,27 @@
+<section class="section main-list-collections" style="padding-top: calc(72px + 3rem);">
+  <div class="container">
+    <div class="section-header" data-animate="fade-up">
+      <div>
+        <p class="section-eyebrow">Explore</p>
+        <h1 class="section-title">ALL COLLECTIONS</h1>
+      </div>
+    </div>
+
+    <div class="collections-grid" data-animate="stagger">
+      {%- for collection in collections -%}
+        {%- unless collection.handle == 'frontpage' -%}
+          {%- render 'collection-card', collection: collection -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collections list",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Collections list" }]
+}
+{% endschema %}

@@ -1,0 +1,32 @@
+<a href="{{ collection.url }}" class="collection-card" data-animate="fade-up">
+  <div class="collection-card__media">
+    {%- if collection.image -%}
+      <img
+        src="{{ collection.image | image_url: width: 600 }}"
+        alt="{{ collection.image.alt | escape | default: collection.title }}"
+        width="600"
+        height="600"
+        loading="lazy"
+      >
+    {%- elsif collection.products.first and collection.products.first.featured_image -%}
+      <img
+        src="{{ collection.products.first.featured_image | image_url: width: 600 }}"
+        alt="{{ collection.title | escape }}"
+        width="600"
+        height="600"
+        loading="lazy"
+      >
+    {%- else -%}
+      <div class="collection-card__placeholder">
+        {{ collection.title | slice: 0, 2 | upcase }}
+      </div>
+    {%- endif -%}
+
+    <div class="collection-card__overlay"></div>
+
+    <div class="collection-card__info">
+      <h3 class="collection-card__title">{{ collection.title }}</h3>
+      <span class="collection-card__count">{{ collection.products_count }} products</span>
+    </div>
+  </div>
+</a>

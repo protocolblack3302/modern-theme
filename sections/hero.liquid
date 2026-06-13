@@ -1,10 +1,12 @@
-<section class="hero" style="
-  {%- if section.settings.overlay_opacity > 0 -%}
-    --hero-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
-  {%- endif -%}
-">
+{%- liquid
+  assign has_media = false
+  if section.settings.image != blank or section.settings.video != blank
+    assign has_media = true
+  endif
+-%}
 
-  <!-- Background media -->
+<section class="hero{% unless has_media %} hero--no-image{% endunless %}">
+
   <div class="hero-media">
     {%- if section.settings.video != blank -%}
       <video
@@ -13,7 +15,7 @@
         muted
         loop
         playsinline
-        poster="{{ section.settings.image | image_url: width: 1800 }}"
+        poster="{%- if section.settings.image != blank -%}{{ section.settings.image | image_url: width: 1800 }}{%- endif -%}"
       ></video>
     {%- elsif section.settings.image != blank -%}
       <img
@@ -31,25 +33,22 @@
         loading="eager"
         fetchpriority="high"
       >
-    {%- else -%}
-      <img src="{{ 'lifestyle-1' | placeholder_svg_tag }}" alt="" width="1800" height="1013" loading="eager">
     {%- endif -%}
   </div>
 
   <div class="hero-overlay"></div>
 
-  <!-- Content -->
   <div class="hero-content container">
     {%- if section.settings.eyebrow != blank -%}
       <span class="hero-eyebrow">{{ section.settings.eyebrow }}</span>
     {%- endif -%}
 
     {%- if section.settings.heading != blank -%}
+      {%- assign heading_words = section.settings.heading | split: ' ' -%}
+      {%- assign mid = heading_words.size | divided_by: 2 -%}
       <h1 class="hero-heading">
-        {%- assign words = section.settings.heading | split: ' ' -%}
-        {%- assign mid = words.size | divided_by: 2 -%}
-        <span class="line">{{ words | slice: 0, mid | join: ' ' }}</span>
-        <span class="line">{{ words | slice: mid, words.size | join: ' ' }}</span>
+        <span class="line">{{ heading_words | slice: 0, mid | join: ' ' }}</span>
+        <span class="line">{{ heading_words | slice: mid, heading_words.size | join: ' ' }}</span>
       </h1>
     {%- endif -%}
 
@@ -59,19 +58,18 @@
 
     <div class="hero-actions">
       {%- if section.settings.cta_primary_label != blank -%}
-        <a href="{{ section.settings.cta_primary_url }}" class="btn btn--primary">
+        <a href="{{ section.settings.cta_primary_url | default: '/collections/all' }}" class="btn btn--primary">
           {{ section.settings.cta_primary_label }}
         </a>
       {%- endif -%}
       {%- if section.settings.cta_secondary_label != blank -%}
-        <a href="{{ section.settings.cta_secondary_url }}" class="btn btn--ghost">
+        <a href="{{ section.settings.cta_secondary_url | default: '/collections/all' }}" class="btn btn--ghost">
           {{ section.settings.cta_secondary_label }}
         </a>
       {%- endif -%}
     </div>
   </div>
 
-  <!-- Scroll hint -->
   <div class="hero-scroll-hint" aria-hidden="true">
     <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" stroke-width="1.5">
       <rect x="1" y="1" width="14" height="22" rx="7"/>
@@ -141,8 +139,7 @@
     {
       "type": "url",
       "id": "cta_primary_url",
-      "label": "Button URL",
-      "default": "/collections/all"
+      "label": "Button URL"
     },
     {
       "type": "header",
@@ -168,7 +165,6 @@
         "heading": "BUILT FOR THE STREETS",
         "subheading": "Premium streetwear engineered for athletes. Wear what moves you.",
         "cta_primary_label": "Shop Now",
-        "cta_primary_url": "/collections/all",
         "cta_secondary_label": "Explore Lookbook"
       }
     }
