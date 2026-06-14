@@ -982,11 +982,11 @@
 
 .footer-nav__title {
   font-family: var(--font-body);
-  font-size: var(--size-xs);
+  font-size: var(--size-sm);
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   margin-bottom: 1.2rem;
 }
 
