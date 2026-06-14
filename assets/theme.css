@@ -297,7 +297,7 @@
 
 .hero {
   position: relative;
-  height: 100svh;
+  height: calc(100svh - 56px);
   min-height: 600px;
   display: flex;
   align-items: center;
