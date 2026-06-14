@@ -2347,9 +2347,51 @@ a.pagination__page:hover {
 
 /* ─── Policy page ────────────────────────────────────── */
 
+/* Our custom policy template */
 .policy-section {
   padding-top: calc(var(--total-header-offset) + 6rem);
   padding-bottom: var(--section-gap);
+}
+
+/* Shopify's native /policies/* pages render .shopify-policy__container */
+.shopify-policy__container {
+  max-width: 780px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  padding-top: calc(var(--total-header-offset) + 4rem);
+  padding-bottom: var(--section-gap);
+}
+
+.shopify-policy__title {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.shopify-policy__title h1 {
+  font-size: var(--size-h1);
+}
+
+.shopify-policy__body {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--color-text-muted);
+}
+
+.shopify-policy__body h2,
+.shopify-policy__body h3 {
+  color: var(--color-text);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.shopify-policy__body p {
+  margin-bottom: 1rem;
+}
+
+.shopify-policy__body a {
+  color: var(--color-accent);
+  text-decoration: underline;
 }
 
 .policy-body {
@@ -2639,7 +2681,8 @@ a.pagination__page:hover {
 
   /* Inner pages: balanced top padding — total-header-offset includes announcement bar */
   .page-content,
-  .policy-section {
+  .policy-section,
+  .shopify-policy__container {
     padding-top: calc(var(--total-header-offset) + 1.75rem);
   }
 
