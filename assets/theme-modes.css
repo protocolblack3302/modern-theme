@@ -1,0 +1,169 @@
+/* ============================================================
+   THEME MODES  —  dark (default)  |  html.light-mode = day
+   ============================================================ */
+
+/* ─── Light mode variable overrides ──────────────────────── */
+html.light-mode {
+  --color-bg:         #f5f5f3;
+  --color-surface:    #ffffff;
+  --color-text:       #0d0d0d;
+  --color-text-muted: #3d3d3d;
+  --color-border:     #dcdcda;
+}
+
+/* ─── Header solid/scrolled state ────────────────────────── */
+html.light-mode .site-header[data-solid],
+html.light-mode .site-header[data-scrolled] {
+  background: rgba(245, 245, 243, 0.96);
+  border-bottom-color: var(--color-border);
+}
+
+/* ─── Marquee strip ──────────────────────────────────────── */
+html.light-mode .marquee-strip {
+  background: var(--color-surface);
+  border-top-color: var(--color-border);
+  border-bottom-color: var(--color-border);
+}
+
+html.light-mode .marquee-item {
+  color: var(--color-text-muted);
+}
+
+/* ─── Cart drawer ────────────────────────────────────────── */
+html.light-mode .cart-drawer {
+  background: var(--color-surface);
+  border-left-color: var(--color-border);
+}
+
+html.light-mode .cart-drawer-header,
+html.light-mode .cart-drawer-footer {
+  border-color: var(--color-border);
+}
+
+html.light-mode .cart-item {
+  border-bottom-color: var(--color-border);
+}
+
+/* ─── Mobile menu ────────────────────────────────────────── */
+html.light-mode .mobile-menu {
+  background: var(--color-bg);
+}
+
+html.light-mode .mobile-menu-footer {
+  border-top-color: var(--color-border);
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+html.light-mode ::-webkit-scrollbar-track { background: var(--color-bg); }
+html.light-mode ::-webkit-scrollbar-thumb { background: var(--color-border); }
+
+
+/* ─── Transparent header (homepage): keep white on dark hero ── */
+html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-nav a,
+html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-logo a,
+html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-icon-btn {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ─── Hero ghost button: keep white on dark hero image ──────── */
+html.light-mode .hero-actions .btn--ghost {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+html.light-mode .hero-actions .btn--ghost:hover {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* ─── Policy body text: force dark on light background ──────── */
+html.light-mode .shopify-policy__body {
+  color: #3d3d3d;
+}
+
+html.light-mode .shopify-policy__body h2,
+html.light-mode .shopify-policy__body h3 {
+  color: #0d0d0d;
+}
+
+/* ─── Page / collection / generic content text ──────────────── */
+html.light-mode .page-content,
+html.light-mode .policy-section {
+  color: var(--color-text-muted);
+}
+
+
+/* ─── HERO — light mode text & overlay fix ────────────────── */
+/* Hero heading & subheading: white-on-dark in default mode,
+   switched to dark-on-light-bg when toggled to day mode. */
+
+html.light-mode .hero-heading {
+  color: var(--color-text);
+}
+
+html.light-mode .hero-subheading {
+  color: var(--color-text-muted);
+}
+
+html.light-mode .hero-scroll-hint {
+  color: var(--color-text-muted);
+}
+
+html.light-mode .hero-scroll-hint svg {
+  stroke: var(--color-text-muted);
+}
+
+/* Hero eyebrow: accent border + text should use muted text in
+   light mode (instead of white-on-accent) */
+html.light-mode .hero-eyebrow {
+  color: var(--color-text-muted);
+  border-color: var(--color-text-muted);
+}
+
+
+/* ─── Hero overlay — light mode gradient ──────────────────── */
+/* The hero overlay sits over the hero image. In dark mode it's
+   a dark gradient. In light mode we use a lighter one so that
+   the text (now dark) stays readable, but still retains the
+   "hero" look as a semi-transparent veil over the media. */
+
+html.light-mode .hero-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 245, 243, 0.85) 0%,
+    rgba(245, 245, 243, 0.45) 60%,
+    rgba(255, 255, 255, 0.55) 100%
+  );
+}
+
+
+/* ─── Hero no-image fallback — light mode ──────────────────── */
+/* When there's no hero image, the hero uses a gradient background.
+   In light mode, switch from dark gradient to a light one. */
+
+html.light-mode .hero--no-image .hero-media {
+  background:
+    radial-gradient(ellipse at 28% 65%, rgba(200, 16, 46, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 72% 20%, rgba(200, 16, 46, 0.06) 0%, transparent 45%),
+    linear-gradient(160deg, #f5f5f3 0%, var(--color-bg) 100%);
+}
+
+html.light-mode .hero--no-image .hero-overlay {
+  background: rgba(245, 245, 243, 0.08);
+}
+
+
+/* ─── Theme toggle button ─────────────────────────────────── */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Sun = visible in dark mode (click to go light) */
+/* Moon = visible in light mode (click to go dark) */
+.icon-sun  { display: block; }
+.icon-moon { display: none;  }
+
+html.light-mode .icon-sun  { display: none;  }
+html.light-mode .icon-moon { display: block; }

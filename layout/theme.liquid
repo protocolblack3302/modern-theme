@@ -28,9 +28,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 
+  <!-- Anti-FOUC: apply theme mode before paint so there's no flash -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('athlents-theme');
+      var h = new Date().getHours();
+      var isDay = h >= 6 && h < 18;
+      if (saved === 'light' || (!saved && isDay)) {
+        document.documentElement.classList.add('light-mode');
+      }
+    })();
+  </script>
+
   <!-- Theme CSS -->
   {{ 'base.css' | asset_url | stylesheet_tag }}
   {{ 'theme.css' | asset_url | stylesheet_tag }}
+  {{ 'theme-modes.css' | asset_url | stylesheet_tag }}
 
   <!-- GSAP + ScrollTrigger (load before theme.js so animations are available) -->
   <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous"></script>
@@ -43,6 +56,7 @@
        (Alpine.store('cart') + Alpine.data('productPage')) are registered
        before Alpine starts. -->
   <script src="{{ 'theme.js' | asset_url }}" defer></script>
+  <script src="{{ 'theme-toggle.js' | asset_url }}" defer></script>
 
   <!-- Alpine.js — loaded LAST so all alpine:init listeners exist first -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.12/dist/cdn.min.js" integrity="sha384-pb6hrQvo4s23cEUFtj0CZkzGE3jyK3pj26RIupXXxhSrrcUA/Cn0lZgcCrGH0t6L" crossorigin="anonymous"></script>
