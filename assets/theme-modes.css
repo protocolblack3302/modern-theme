@@ -7,7 +7,7 @@ html.light-mode {
   --color-bg:         #f5f5f3;
   --color-surface:    #ffffff;
   --color-text:       #0d0d0d;
-  --color-text-muted: #2a2a2a;
+  --color-text-muted: #1a1a1a;
   --color-border:     #dcdcda;
 }
 
@@ -162,6 +162,34 @@ html.light-mode .hero-actions .btn--ghost {
 
 html.light-mode .hero-actions .btn--ghost:hover {
   border-color: var(--color-text);
+}
+
+
+/* ─── RTE (rich text editor content) — light mode overrides ── */
+/* The .rte class is used by Shopify for page/blog content.
+   It has hardcoded rgba(240,240,240,*) colors that are
+   invisible on light backgrounds. */
+
+html.light-mode .rte,
+html.light-mode .rte p,
+html.light-mode .rte li,
+html.light-mode .rte ul,
+html.light-mode .rte ol {
+  color: var(--color-text);
+}
+
+html.light-mode .rte h2,
+html.light-mode .rte h3 {
+  color: var(--color-text);
+}
+
+html.light-mode .rte strong {
+  color: var(--color-text);
+}
+
+html.light-mode .rte blockquote {
+  color: var(--color-text-muted);
+  border-left-color: var(--color-accent);
 }
 
 
