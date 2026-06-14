@@ -58,23 +58,6 @@ html.light-mode ::-webkit-scrollbar-track { background: var(--color-bg); }
 html.light-mode ::-webkit-scrollbar-thumb { background: var(--color-border); }
 
 
-/* ─── Transparent header (homepage): keep white on dark hero ── */
-html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-nav a,
-html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-logo a,
-html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-icon-btn {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* ─── Hero ghost button: keep white on dark hero image ──────── */
-html.light-mode .hero-actions .btn--ghost {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.55);
-}
-
-html.light-mode .hero-actions .btn--ghost:hover {
-  border-color: rgba(255, 255, 255, 0.9);
-}
-
 /* ─── Policy body text: force dark on light background ──────── */
 html.light-mode .shopify-policy__body {
   color: #3d3d3d;
@@ -122,16 +105,17 @@ html.light-mode .hero-eyebrow {
 
 /* ─── Hero overlay — light mode gradient ──────────────────── */
 /* The hero overlay sits over the hero image. In dark mode it's
-   a dark gradient. In light mode we use a lighter one so that
-   the text (now dark) stays readable, but still retains the
-   "hero" look as a semi-transparent veil over the media. */
+   a dark gradient that makes the white text readable. In light
+   mode we use a lighter gradient so the dark text stays readable,
+   but we keep it at least 80% opacity so the hero image is
+   barely visible underneath. */
 
 html.light-mode .hero-overlay {
   background: linear-gradient(
     135deg,
-    rgba(245, 245, 243, 0.85) 0%,
-    rgba(245, 245, 243, 0.45) 60%,
-    rgba(255, 255, 255, 0.55) 100%
+    rgba(245, 245, 243, 0.95) 0%,
+    rgba(245, 245, 243, 0.65) 60%,
+    rgba(245, 245, 243, 0.80) 100%
   );
 }
 
@@ -149,6 +133,35 @@ html.light-mode .hero--no-image .hero-media {
 
 html.light-mode .hero--no-image .hero-overlay {
   background: rgba(245, 245, 243, 0.08);
+}
+
+
+/* ─── Transparent header (homepage): switch to dark text in light mode ── */
+/* When the header is on the homepage and not scrolled, it's transparent.
+   In dark mode, the hero image provides the background, so text is white.
+   In light mode, the hero image still shows, but we need dark text. */
+
+html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-nav a,
+html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-logo a,
+html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-icon-btn {
+  color: var(--color-text);
+}
+
+html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-nav a::after {
+  background: var(--color-accent);
+}
+
+/* ─── Hero ghost button ────────────────────────────────────── */
+/* In light mode, the hero ghost button should use the light mode
+   border/text colors so it's visible against the hero image/overlay. */
+
+html.light-mode .hero-actions .btn--ghost {
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+html.light-mode .hero-actions .btn--ghost:hover {
+  border-color: var(--color-text);
 }
 
 
