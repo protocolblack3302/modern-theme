@@ -1428,6 +1428,11 @@
   .hero-actions { flex-direction: column; }
   .hero-actions .btn { width: 100%; justify-content: center; }
 
+  /* Reserve space at bottom of hero content so the absolute scroll hint never overlaps */
+  .hero-content {
+    padding-bottom: 4.5rem;
+  }
+
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 2.5rem;
@@ -2662,6 +2667,29 @@ a.pagination__page:hover {
   .hero {
     min-height: 320px;
     height: 85svh;
+    /* Switch to top-aligned so content clears the fixed header */
+    align-items: flex-start;
+  }
+
+  /* Push content below the fixed header + announcement bar, reserve bottom for scroll hint */
+  .hero-content {
+    padding-top: calc(var(--total-header-offset) + 1.25rem);
+    padding-bottom: 5rem;
+  }
+
+  /* Shrink heading so the full stack (eyebrow + heading + subtext + 2 buttons) fits the viewport */
+  .hero-heading {
+    font-size: clamp(3rem, 10vw, 4rem);
+    margin-bottom: 1rem;
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-subheading {
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
   }
 
   /* Product grid: 2 cols, tighter gap */
