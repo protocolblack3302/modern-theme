@@ -890,7 +890,7 @@
 /* ─── Main Cart Page ──────────────────────────────────── */
 
 .main-cart-container {
-  padding-top: calc(var(--header-height) + 3rem);
+  padding-top: calc(var(--total-header-offset) + 3rem);
 }
 
 .main-cart-title {
@@ -1073,7 +1073,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.4rem;
-  padding-top: calc(var(--header-height) + 1.5rem);
+  padding-top: calc(var(--total-header-offset) + 1.5rem);
   padding-bottom: 1.5rem;
   font-size: var(--size-xs);
   letter-spacing: 0.06em;
@@ -1319,7 +1319,7 @@
 /* ─── Collection Page ─────────────────────────────────── */
 
 .collection-header {
-  padding-top: calc(var(--header-height) + 3rem);
+  padding-top: calc(var(--total-header-offset) + 3rem);
   padding-bottom: 3rem;
   border-bottom: 1px solid var(--color-border);
   margin-bottom: 0;
@@ -1341,7 +1341,7 @@
 /* ─── Page (generic) ──────────────────────────────────── */
 
 .page-content {
-  padding-top: calc(var(--header-height) + 4rem);
+  padding-top: calc(var(--total-header-offset) + 4rem);
   padding-bottom: var(--section-gap);
   max-width: 720px;
 }
@@ -2348,7 +2348,7 @@ a.pagination__page:hover {
 /* ─── Policy page ────────────────────────────────────── */
 
 .policy-section {
-  padding-top: calc(var(--header-height) + 6rem);
+  padding-top: calc(var(--total-header-offset) + 6rem);
   padding-bottom: var(--section-gap);
 }
 
@@ -2637,23 +2637,23 @@ a.pagination__page:hover {
     font-size: clamp(1.75rem, 7vw, 2.2rem);
   }
 
-  /* Inner pages: balanced top padding — header-height + 1.75rem breathing room */
+  /* Inner pages: balanced top padding — total-header-offset includes announcement bar */
   .page-content,
   .policy-section {
-    padding-top: calc(var(--header-height) + 1.75rem);
+    padding-top: calc(var(--total-header-offset) + 1.75rem);
   }
 
   .collection-header {
-    padding-top: calc(var(--header-height) + 1.75rem);
+    padding-top: calc(var(--total-header-offset) + 1.75rem);
     padding-bottom: 1.5rem;
   }
 
   .main-cart-container {
-    padding-top: calc(var(--header-height) + 1.75rem);
+    padding-top: calc(var(--total-header-offset) + 1.75rem);
   }
 
   .breadcrumb {
-    padding-top: calc(var(--header-height) + 1.25rem);
+    padding-top: calc(var(--total-header-offset) + 1.25rem);
   }
 }
 
