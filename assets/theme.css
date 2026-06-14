@@ -1131,6 +1131,7 @@
 .product-gallery {
   position: sticky;
   top: calc(var(--total-header-offset) + 2rem);
+  min-width: 0;
 }
 
 .product-gallery__main {
@@ -1190,6 +1191,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .product-details__brand {
@@ -1204,6 +1206,8 @@
 .product-details__title {
   font-size: var(--size-h2);
   line-height: var(--leading-tight);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .product-details__price {
