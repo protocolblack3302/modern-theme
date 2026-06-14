@@ -2663,11 +2663,10 @@ a.pagination__page:hover {
     font-size: 0.9rem;
   }
 
-  /* Hero height: prevent 600px min from consuming small screens */
+  /* Hero fills exactly one viewport: announcement (in flow) + hero + marquee = 100svh */
   .hero {
     min-height: 320px;
-    height: 85svh;
-    /* Switch to top-aligned so content clears the fixed header */
+    height: calc(100svh - var(--announcement-height, 2rem) - var(--marquee-height, 3.5rem));
     align-items: flex-start;
   }
 
@@ -2704,5 +2703,45 @@ a.pagination__page:hover {
   /* Section headers: stack */
   .section-header {
     gap: 0.75rem;
+  }
+}
+
+/* ─── Larger phones (iPhone 14 390px, 15 Plus 430px, Pixel 412px) ────────────
+   svh-based clamp: min value = SE equivalent, so SE (375px) stays unchanged.
+   On taller phones the preferred value wins and elements grow proportionally. */
+@media (min-width: 390px) and (max-width: 480px) {
+
+  /* Header logo scales with viewport height */
+  .header-logo a {
+    font-size: clamp(1.75rem, 4svh, 2.5rem);
+    letter-spacing: 0.13em;
+  }
+
+  /* More space below navbar to "NEW COLLECTION" eyebrow on taller phones */
+  .hero-content {
+    padding-top: calc(var(--total-header-offset) + clamp(1.25rem, 3svh, 4rem));
+    padding-bottom: clamp(5rem, 10svh, 8rem);
+  }
+
+  /* Heading scales with svh — clamp min=3rem keeps SE heading unchanged */
+  .hero-heading {
+    font-size: clamp(3rem, 7svh, 5rem);
+    margin-bottom: clamp(1rem, 2.5svh, 2.5rem);
+  }
+
+  .hero-eyebrow {
+    margin-bottom: clamp(0.75rem, 2svh, 2rem);
+  }
+
+  /* Subheading scales with viewport height */
+  .hero-subheading {
+    font-size: clamp(0.875rem, 2svh, 1.25rem);
+    margin-bottom: clamp(1.5rem, 3svh, 3rem);
+  }
+
+  /* Bigger buttons on taller screens */
+  .hero-actions .btn {
+    font-size: clamp(0.9rem, 2svh, 1.25rem) !important;
+    min-height: clamp(3rem, 6.5svh, 4.25rem);
   }
 }
