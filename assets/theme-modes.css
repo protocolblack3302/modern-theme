@@ -7,7 +7,7 @@ html.light-mode {
   --color-bg:         #f5f5f3;
   --color-surface:    #ffffff;
   --color-text:       #0d0d0d;
-  --color-text-muted: #3d3d3d;
+  --color-text-muted: #2a2a2a;
   --color-border:     #dcdcda;
 }
 
@@ -60,12 +60,12 @@ html.light-mode ::-webkit-scrollbar-thumb { background: var(--color-border); }
 
 /* ─── Policy body text: force dark on light background ──────── */
 html.light-mode .shopify-policy__body {
-  color: #3d3d3d;
+  color: var(--color-text);
 }
 
 html.light-mode .shopify-policy__body h2,
 html.light-mode .shopify-policy__body h3 {
-  color: #0d0d0d;
+  color: var(--color-text);
 }
 
 /* ─── Page / collection / generic content text ──────────────── */
