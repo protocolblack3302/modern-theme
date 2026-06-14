@@ -2400,7 +2400,7 @@ a.pagination__page:hover {
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.8;
-  color: #b0b0b0;
+  color: var(--color-text-muted);
 }
 
 .policy-body h1 {
@@ -2437,7 +2437,7 @@ a.pagination__page:hover {
 
 .policy-body p {
   margin-bottom: 1.25rem;
-  color: #b0b0b0;
+  color: var(--color-text-muted);
 }
 
 .policy-body a {
@@ -2448,7 +2448,7 @@ a.pagination__page:hover {
 }
 
 .policy-body a:hover {
-  color: #e02040;
+  color: var(--color-accent);
 }
 
 .policy-body strong {
@@ -2464,14 +2464,14 @@ a.pagination__page:hover {
 
 .policy-body li {
   margin-bottom: 0.5rem;
-  color: #b0b0b0;
+  color: var(--color-text-muted);
 }
 
 .policy-body blockquote {
   border-left: 3px solid var(--color-accent);
   padding-left: 1.25rem;
   margin: 2rem 0;
-  color: #888;
+  color: var(--color-text-muted);
   font-style: italic;
   font-size: 0.95rem;
   line-height: 1.7;
