@@ -1418,10 +1418,6 @@
   .header-nav { display: none; }
   .header-hamburger { display: flex; }
   .header-logo { justify-content: center; }
-  /* Account hidden on mobile — accessible from hamburger menu.
-     Keeps 4 icons (toggle + search + cart + hamburger) which fit
-     without squeezing the logo on 390-430px phones. */
-  .header-account-btn { display: none; }
 }
 
 @media (max-width: 768px) {
@@ -1433,9 +1429,15 @@
     column-gap: 0;
   }
 
-  /* Tighten icon spacing so the logo gets more room */
+  /* Compact icon row: 5 icons × 32px + 4 × 2px gap = 168px total,
+     leaving ~185px for the logo on iPhone 16 */
   .header-actions {
-    gap: 4px;
+    gap: 2px;
+  }
+
+  .header-icon-btn {
+    min-width: 32px;
+    min-height: 32px;
   }
 
   .hero-actions { flex-direction: column; }
