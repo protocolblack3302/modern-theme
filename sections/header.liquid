@@ -155,6 +155,12 @@
     {%- if settings.social_instagram != blank -%}
       <a href="{{ settings.social_instagram }}" aria-label="Instagram" target="_blank" rel="noopener noreferrer">Instagram</a>
     {%- endif -%}
+
+    <!-- Theme toggle — only shown in mobile menu (header toggle hidden at ≤960px) -->
+    <button type="button" id="theme-toggle-mobile" class="mobile-menu-account mobile-theme-toggle" aria-label="Toggle light/dark mode">
+      <span class="mobile-theme-day">☀ Day</span>
+      <span class="mobile-theme-night">☽ Night</span>
+    </button>
   </div>
 </div>
 

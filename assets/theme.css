@@ -1418,6 +1418,9 @@
   .header-nav { display: none; }
   .header-hamburger { display: flex; }
   .header-logo { justify-content: center; }
+  /* Theme toggle moves to mobile menu — removing it from header prevents
+     the 5-icon row from squeezing the logo on 390-430px phones */
+  #theme-toggle { display: none; }
 }
 
 @media (max-width: 768px) {
