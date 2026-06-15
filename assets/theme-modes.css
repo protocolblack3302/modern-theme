@@ -136,18 +136,23 @@ html.light-mode .hero--no-image .hero-overlay {
 }
 
 
-/* ─── Transparent header (homepage): switch to dark text in light mode ── */
-/* When the header is on the homepage and not scrolled, it's transparent.
-   In dark mode, the hero image provides the background, so text is white.
-   In light mode, the hero image still shows, but we need dark text. */
+/* ─── Header — all states in light mode ───────────────────── */
+/* Both the transparent homepage header and the solid/scrolled header
+   have a light background in day mode, so all text and icons must be dark.
+   This catch-all rule ensures icons never go invisible regardless of
+   scroll state or which page we're on. */
 
-html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-nav a,
-html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-logo a,
-html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-icon-btn {
+html.light-mode .site-header .header-nav a,
+html.light-mode .site-header .header-logo a,
+html.light-mode .site-header .header-icon-btn {
   color: var(--color-text);
 }
 
-html.light-mode .site-header:not([data-scrolled]):not([data-solid]) .header-nav a::after {
+html.light-mode .site-header .header-icon-btn:hover {
+  color: var(--color-accent);
+}
+
+html.light-mode .site-header .header-nav a::after {
   background: var(--color-accent);
 }
 
