@@ -1426,6 +1426,15 @@
 @media (max-width: 768px) {
   .header-inner {
     grid-template-columns: auto 1fr auto;
+    /* Zero the column-gap: the hidden nav column is already 0px wide,
+       so both gaps just steal space from the logo. At 393px this was
+       leaving only 101px for ATHLENTS (needs ~135px) → overlap. */
+    column-gap: 0;
+  }
+
+  /* Tighten icon spacing so the logo gets more room */
+  .header-actions {
+    gap: 4px;
   }
 
   .hero-actions { flex-direction: column; }
