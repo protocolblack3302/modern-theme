@@ -1418,9 +1418,10 @@
   .header-nav { display: none; }
   .header-hamburger { display: flex; }
   .header-logo { justify-content: center; }
-  /* Theme toggle moves to mobile menu — removing it from header prevents
-     the 5-icon row from squeezing the logo on 390-430px phones */
-  #theme-toggle { display: none; }
+  /* Account hidden on mobile — accessible from hamburger menu.
+     Keeps 4 icons (toggle + search + cart + hamburger) which fit
+     without squeezing the logo on 390-430px phones. */
+  .header-account-btn { display: none; }
 }
 
 @media (max-width: 768px) {

@@ -57,10 +57,10 @@
         {%- render 'icon-search' -%}
       </a>
 
-      <!-- Account — always visible so there's always a sign-in entry point -->
+      <!-- Account — hidden on mobile (accessible via hamburger menu) -->
       <a
         href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
-        class="header-icon-btn"
+        class="header-icon-btn header-account-btn"
         aria-label="{{ 'account.my_account' | t }}"
       >
         {%- render 'icon-account' -%}
