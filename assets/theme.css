@@ -1429,16 +1429,6 @@
     column-gap: 0;
   }
 
-  /* Compact icon row: 5 icons × 32px + 4 × 2px gap = 168px total,
-     leaving ~185px for the logo on iPhone 16 */
-  .header-actions {
-    gap: 2px;
-  }
-
-  .header-icon-btn {
-    min-width: 32px;
-    min-height: 32px;
-  }
 
   .hero-actions { flex-direction: column; }
   .hero-actions .btn { width: 100%; justify-content: center; }
@@ -2605,6 +2595,10 @@ a.pagination__page:hover {
 }
 
 @media (max-width: 768px) {
+  /* Override the 44px touch targets above — 5 icons × 32px + 4 × 2px = 168px,
+     leaving ~185px for the ATHLENTS logo (~147px needed) on iPhone 16 */
+  .header-actions { gap: 2px; }
+  .header-icon-btn { min-width: 32px; min-height: 32px; }
 
   /* Product page: full-width single column on mobile */
   .product-page {
